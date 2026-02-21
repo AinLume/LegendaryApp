@@ -1,0 +1,1145 @@
+openapi: 3.0.3
+info:
+  title: Restaurant CRM API
+  description: REST API для CRM системы ресторана
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local dev server
+
+tags:
+  - name: Auth
+  - name: Tables
+  - name: Reservations
+  - name: Menu
+  - name: Orders
+  - name: Order Items
+  - name: Analytics
+
+paths:
+
+  # ───────────────────────── AUTH ─────────────────────────
+
+  /auth/staff/login:
+    post:
+      tags: [Auth]
+      summary: Авторизация сотрудника
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffLoginRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Неверный логин или пароль
+
+  /auth/client/register:
+    post:
+      tags: [Auth]
+      summary: Регистрация клиента
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRegisterRequest'
+      responses:
+        '201':
+          description: Клиент зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '409':
+          description: Клиент с таким телефоном уже существует
+
+  /auth/client/login:
+    post:
+      tags: [Auth]
+      summary: Авторизация клиента
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientLoginRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Неверный логин или пароль
+
+  # ───────────────────────── TABLES ─────────────────────────
+
+  /tables:
+    get:
+      tags: [Tables]
+      summary: Получить все столы
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список столов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TableResponse'
+    post:
+      tags: [Tables]
+      summary: Создать стол
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTableRequest'
+      responses:
+        '201':
+          description: Стол создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableResponse'
+
+  /tables/{id}/position:
+    put:
+      tags: [Tables]
+      summary: Обновить позицию стола на плане
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTablePositionRequest'
+      responses:
+        '200':
+          description: Позиция обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableResponse'
+        '404':
+          description: Стол не найден
+
+  /tables/{id}/status:
+    put:
+      tags: [Tables]
+      summary: Обновить статус стола
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTableStatusRequest'
+      responses:
+        '200':
+          description: Статус обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableResponse'
+        '404':
+          description: Стол не найден
+
+  /tables/{id}:
+    delete:
+      tags: [Tables]
+      summary: Удалить стол
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Стол удалён
+        '404':
+          description: Стол не найден
+
+  # ───────────────────────── RESERVATIONS ─────────────────────────
+
+  /reservations:
+    get:
+      tags: [Reservations]
+      summary: Получить все бронирования
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список бронирований
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReservationResponse'
+    post:
+      tags: [Reservations]
+      summary: Создать бронирование
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReservationRequest'
+      responses:
+        '201':
+          description: Бронирование создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationResponse'
+        '409':
+          description: Стол уже занят на это время
+
+  /reservations/{id}:
+    get:
+      tags: [Reservations]
+      summary: Получить бронирование по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Бронирование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationResponse'
+        '404':
+          description: Бронирование не найдено
+
+  /reservations/available-tables:
+    get:
+      tags: [Reservations]
+      summary: Получить свободные столы на время
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: persons
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список свободных столов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TableResponse'
+
+  /reservations/{id}/cancel:
+    put:
+      tags: [Reservations]
+      summary: Отменить бронирование
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Бронирование отменено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationResponse'
+        '404':
+          description: Бронирование не найдено
+
+  # ───────────────────────── MENU ─────────────────────────
+
+  /menu/categories:
+    get:
+      tags: [Menu]
+      summary: Получить все категории
+      responses:
+        '200':
+          description: Список категорий
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuCategoryResponse'
+    post:
+      tags: [Menu]
+      summary: Создать категорию
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMenuCategoryRequest'
+      responses:
+        '201':
+          description: Категория создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuCategoryResponse'
+
+  /menu/categories/{id}:
+    delete:
+      tags: [Menu]
+      summary: Удалить категорию
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Категория удалена
+        '404':
+          description: Категория не найдена
+
+  /menu:
+    get:
+      tags: [Menu]
+      summary: Получить все блюда
+      parameters:
+        - name: categoryId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список блюд
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuItemResponse'
+    post:
+      tags: [Menu]
+      summary: Создать блюдо
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMenuItemRequest'
+      responses:
+        '201':
+          description: Блюдо создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItemResponse'
+
+  /menu/{id}:
+    get:
+      tags: [Menu]
+      summary: Получить блюдо по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Блюдо
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItemResponse'
+        '404':
+          description: Блюдо не найдено
+    put:
+      tags: [Menu]
+      summary: Обновить блюдо
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMenuItemRequest'
+      responses:
+        '200':
+          description: Блюдо обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItemResponse'
+        '404':
+          description: Блюдо не найдено
+    delete:
+      tags: [Menu]
+      summary: Удалить блюдо
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Блюдо удалено
+        '404':
+          description: Блюдо не найдено
+
+  # ───────────────────────── ORDERS ─────────────────────────
+
+  /orders:
+    get:
+      tags: [Orders]
+      summary: Получить все заказы
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+      responses:
+        '200':
+          description: Список заказов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+    post:
+      tags: [Orders]
+      summary: Создать заказ
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Заказ создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+
+  /orders/{id}:
+    get:
+      tags: [Orders]
+      summary: Получить заказ по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Заказ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Заказ не найден
+
+  /orders/table/{tableId}:
+    get:
+      tags: [Orders]
+      summary: Получить заказы по столу
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tableId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список заказов стола
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+
+  /orders/client/{clientId}:
+    get:
+      tags: [Orders]
+      summary: Получить историю заказов клиента
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: История заказов клиента
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+
+  /orders/{id}/close:
+    put:
+      tags: [Orders]
+      summary: Закрыть счёт
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseOrderRequest'
+      responses:
+        '200':
+          description: Счёт закрыт
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Заказ не найден
+
+  /orders/{id}/cancel:
+    put:
+      tags: [Orders]
+      summary: Отменить заказ
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Заказ отменён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Заказ не найден
+
+  # ───────────────────────── ORDER ITEMS ─────────────────────────
+
+  /order-items/kitchen:
+    get:
+      tags: [Order Items]
+      summary: Получить позиции для кухни
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/OrderItemStatus'
+      responses:
+        '200':
+          description: Список позиций для кухни
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderItemResponse'
+
+  /order-items/bar:
+    get:
+      tags: [Order Items]
+      summary: Получить позиции для бара
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/OrderItemStatus'
+      responses:
+        '200':
+          description: Список позиций для бара
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderItemResponse'
+
+  /order-items/{id}/status:
+    put:
+      tags: [Order Items]
+      summary: Обновить статус позиции
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderItemStatusRequest'
+      responses:
+        '200':
+          description: Статус обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderItemResponse'
+        '404':
+          description: Позиция не найдена
+
+  # ───────────────────────── ANALYTICS ─────────────────────────
+
+  /analytics:
+    get:
+      tags: [Analytics]
+      summary: Получить аналитику
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/AnalyticsPeriod'
+      responses:
+        '200':
+          description: Аналитика за период
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsResponse'
+
+# ───────────────────────── COMPONENTS ─────────────────────────
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    # Auth
+    StaffLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    ClientRegisterRequest:
+      type: object
+      required: [name, phone, password]
+      properties:
+        name:
+          type: string
+          maxLength: 50
+        phone:
+          type: string
+          maxLength: 20
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    ClientLoginRequest:
+      type: object
+      required: [phone, password]
+      properties:
+        phone:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        role:
+          type: string
+
+    # Tables
+    TableResponse:
+      type: object
+      properties:
+        tableId:
+          type: integer
+        number:
+          type: integer
+        capacity:
+          type: integer
+        posX:
+          type: integer
+        posY:
+          type: integer
+        status:
+          $ref: '#/components/schemas/TableStatus'
+
+    TableShortResponse:
+      type: object
+      properties:
+        tableId:
+          type: integer
+        number:
+          type: integer
+        capacity:
+          type: integer
+
+    CreateTableRequest:
+      type: object
+      required: [number, capacity]
+      properties:
+        number:
+          type: integer
+        capacity:
+          type: integer
+        posX:
+          type: integer
+        posY:
+          type: integer
+
+    UpdateTablePositionRequest:
+      type: object
+      required: [posX, posY]
+      properties:
+        posX:
+          type: integer
+        posY:
+          type: integer
+
+    UpdateTableStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/TableStatus'
+
+    # Reservations
+    ReservationResponse:
+      type: object
+      properties:
+        reservationId:
+          type: integer
+          format: int64
+        table:
+          $ref: '#/components/schemas/TableShortResponse'
+        guestName:
+          type: string
+        guestPhone:
+          type: string
+        persons:
+          type: integer
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        type:
+          $ref: '#/components/schemas/ReservationType'
+        status:
+          $ref: '#/components/schemas/ReservationStatus'
+        note:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateReservationRequest:
+      type: object
+      required: [tableId, guestName, persons, startTime, endTime, type]
+      properties:
+        tableId:
+          type: integer
+        guestName:
+          type: string
+          maxLength: 500
+        guestPhone:
+          type: string
+          maxLength: 20
+        persons:
+          type: integer
+          minimum: 1
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        type:
+          $ref: '#/components/schemas/ReservationType'
+        note:
+          type: string
+
+    # Menu
+    MenuCategoryResponse:
+      type: object
+      properties:
+        menuCategoryId:
+          type: integer
+        name:
+          type: string
+
+    CreateMenuCategoryRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 50
+
+    MenuItemResponse:
+      type: object
+      properties:
+        menuItemId:
+          type: integer
+          format: int64
+        category:
+          $ref: '#/components/schemas/MenuCategoryResponse'
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+          format: int64
+        photoUrl:
+          type: string
+        type:
+          $ref: '#/components/schemas/MenuItemType'
+        isAvailable:
+          type: boolean
+
+    CreateMenuItemRequest:
+      type: object
+      required: [categoryId, name, price, type]
+      properties:
+        categoryId:
+          type: integer
+        name:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+        price:
+          type: integer
+          format: int64
+          minimum: 0
+        photoUrl:
+          type: string
+        type:
+          $ref: '#/components/schemas/MenuItemType'
+
+    UpdateMenuItemRequest:
+      type: object
+      required: [categoryId, name, price, isAvailable]
+      properties:
+        categoryId:
+          type: integer
+        name:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+        price:
+          type: integer
+          format: int64
+          minimum: 0
+        photoUrl:
+          type: string
+        isAvailable:
+          type: boolean
+
+    # Orders
+    CreateOrderRequest:
+      type: object
+      required: [type, items]
+      properties:
+        type:
+          $ref: '#/components/schemas/OrderType'
+        tableId:
+          type: integer
+        clientId:
+          type: integer
+          format: int64
+        deliveryAddress:
+          type: string
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/OrderItemRequest'
+
+    OrderItemRequest:
+      type: object
+      required: [menuItemId, quantity]
+      properties:
+        menuItemId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          minimum: 1
+        comment:
+          type: string
+
+    CloseOrderRequest:
+      type: object
+      required: [paymentMethod]
+      properties:
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+
+    OrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        type:
+          $ref: '#/components/schemas/OrderType'
+        table:
+          $ref: '#/components/schemas/TableShortResponse'
+        clientId:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        totalAmount:
+          type: integer
+          format: int64
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+        createdAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+
+    OrderItemResponse:
+      type: object
+      properties:
+        orderItemId:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        menuItem:
+          $ref: '#/components/schemas/MenuItemResponse'
+        quantity:
+          type: integer
+        comment:
+          type: string
+        status:
+          $ref: '#/components/schemas/OrderItemStatus'
+        destination:
+          $ref: '#/components/schemas/Destination'
+
+    UpdateOrderItemStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/OrderItemStatus'
+
+    # Analytics
+    AnalyticsResponse:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/AnalyticsPeriod'
+        totalRevenue:
+          type: integer
+          format: int64
+        ordersCount:
+          type: integer
+          format: int64
+        averageCheck:
+          type: integer
+          format: int64
+        popularItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/PopularItemResponse'
+        tableOccupancy:
+          type: number
+          format: double
+
+    PopularItemResponse:
+      type: object
+      properties:
+        menuItemId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        ordersCount:
+          type: integer
+          format: int64
+
+    # Enums
+    TableStatus:
+      type: string
+      enum: [FREE, OCCUPIED, RESERVED]
+
+    ReservationType:
+      type: string
+      enum: [TABLE, EVENT]
+
+    ReservationStatus:
+      type: string
+      enum: [ACTIVE, CANCELLED]
+
+    MenuItemType:
+      type: string
+      enum: [FOOD, DRINK]
+
+    OrderType:
+      type: string
+      enum: [DINE_IN, DELIVERY]
+
+    OrderStatus:
+      type: string
+      enum: [NEW, IN_PROGRESS, READY, PAID, CANCELLED]
+
+    OrderItemStatus:
+      type: string
+      enum: [NEW, IN_PROGRESS, READY]
+
+    PaymentMethod:
+      type: string
+      enum: [CASH, CARD, ONLINE]
+
+    Destination:
+      type: string
+      enum: [KITCHEN, BAR]
+
+    AnalyticsPeriod:
+      type: string
+      enum: [DAY, WEEK, MONTH]
