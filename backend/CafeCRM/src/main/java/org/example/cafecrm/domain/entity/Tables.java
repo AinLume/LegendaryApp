@@ -39,9 +39,9 @@ public class Tables {
     @Enumerated(EnumType.STRING)
     private TableStatus status;
 
-//    @OneToMany(mappedBy = "table", fetch = FetchType.LAZY)
-//    private List<Order> orders = new ArrayList<>();
-//
+    @OneToMany(mappedBy = "table", fetch = FetchType.LAZY)
+    private List<Order> orders = new ArrayList<>();
+
     @OneToMany(mappedBy = "table", fetch = FetchType.LAZY)
     private List<Reservation> reservations = new ArrayList<>();
 }

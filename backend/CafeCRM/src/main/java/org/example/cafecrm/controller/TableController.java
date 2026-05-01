@@ -1,40 +1,88 @@
 package org.example.cafecrm.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.cafecrm.domain.dto.table.CreateTableRequest;
+import org.example.cafecrm.domain.dto.table.TableResponse;
 import org.example.cafecrm.domain.dto.table.UpdateTablePositionRequest;
 import org.example.cafecrm.domain.dto.table.UpdateTableStatusRequest;
+import org.example.cafecrm.service.TableService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tables")
+@RequiredArgsConstructor
+@Validated
+@Slf4j
 public class TableController {
 
+    private final TableService tableService;
+
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody @Valid CreateTableRequest request) {
-        return ResponseEntity.ok("tableService.create()");
+    public ResponseEntity<@NotNull TableResponse> create(@RequestBody @Valid CreateTableRequest request) {
+
+        log.info("TableController:create.start, dto: {}", request);
+
+        TableResponse response = tableService.create(request);
+
+        log.info("TableController:create.end, response: {}", response);
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
-        return ResponseEntity.ok("tableService.delete()");
+    public ResponseEntity<@NotNull TableResponse> delete(@PathVariable Integer id) {
+
+        log.info("TableController:delete.start, id: {}", id);
+
+        tableService.deleteTableById(id);
+
+        log.info("TableController:delete.end, id: {}", id);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllTables() {
-        return ResponseEntity.ok("tableService.getAllTables()");
+    public ResponseEntity<@NotNull List<TableResponse>> getAllTables() {
+
+        log.info("TableController:getAllTables.start");
+
+        List<TableResponse> response = tableService.findAll();
+
+        log.info("TableController:getAllTables.end, count: {}", response.size());
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/position")
-    public ResponseEntity<?> updatePosition(@PathVariable Integer id,
+    public ResponseEntity<@NotNull TableResponse> updatePosition(@PathVariable Integer id,
                                             @RequestBody @Valid UpdateTablePositionRequest request) {
-        return ResponseEntity.ok("tableService.updatePosition()");
+
+        log.info("TableController:updatePosition.start, id: {}, dto: {}", id, request);
+
+        TableResponse response = tableService.updateTablePosition(id, request);
+
+        log.info("TableController:updatePosition.end, response: {}", response);
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<?> updateStatus(@PathVariable Integer id,
+    public ResponseEntity<@NotNull TableResponse> updateStatus(@PathVariable Integer id,
                                           @RequestBody @Valid UpdateTableStatusRequest request) {
-        return ResponseEntity.ok("tableService.updateStatus()");
+
+        log.info("TableController:updateStatus.start, id: {}, dto: {}", id, request);
+
+        TableResponse response = tableService.updateTableStatusById(id, request);
+
+        log.info("TableController:updateStatus.end, response: {}", response);
+
+        return ResponseEntity.ok(response);
     }
 }
