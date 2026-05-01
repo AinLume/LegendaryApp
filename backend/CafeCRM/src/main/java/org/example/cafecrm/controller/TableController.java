@@ -60,7 +60,7 @@ public class TableController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/position")
+    @PatchMapping("/{id}/position")
     public ResponseEntity<@NotNull TableResponse> updatePosition(@PathVariable Integer id,
                                             @RequestBody @Valid UpdateTablePositionRequest request) {
 
@@ -73,7 +73,7 @@ public class TableController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/status")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<@NotNull TableResponse> updateStatus(@PathVariable Integer id,
                                           @RequestBody @Valid UpdateTableStatusRequest request) {
 

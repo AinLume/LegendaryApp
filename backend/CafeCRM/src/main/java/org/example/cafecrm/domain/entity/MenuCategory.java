@@ -19,7 +19,7 @@ import java.util.List;
 public class MenuCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "menu_category_id")
     private Integer id;
 

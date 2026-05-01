@@ -6,5 +6,5 @@ public record TableResponse(
         Integer capacity,
         Integer posX,
         Integer posY,
-        Integer status
+        String status
 ) {}

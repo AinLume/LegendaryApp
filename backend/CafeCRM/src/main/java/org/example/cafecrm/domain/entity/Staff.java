@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class Staff {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "staff_id")
     private Long id;
 

@@ -19,7 +19,7 @@ import java.util.List;
 public class Tables {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "table_id")
     private Integer id;
 

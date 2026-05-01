@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class MenuItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "menu_item_id")
     private Long id;
 
