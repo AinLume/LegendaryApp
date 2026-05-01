@@ -2,9 +2,9 @@ package org.example.cafecrm.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.cafecrm.dto.CloseOrderRequest;
-import org.example.cafecrm.dto.CreateOrderRequest;
-import org.example.cafecrm.enums.OrderStatus;
+import org.example.cafecrm.domain.dto.order.CloseOrderRequest;
+import org.example.cafecrm.domain.dto.order.CreateOrderRequest;
+import org.example.cafecrm.domain.values.OrderStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

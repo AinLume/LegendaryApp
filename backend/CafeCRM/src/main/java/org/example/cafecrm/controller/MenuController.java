@@ -2,9 +2,9 @@ package org.example.cafecrm.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.cafecrm.dto.CreateMenuCategoryRequest;
-import org.example.cafecrm.dto.CreateMenuItemRequest;
-import org.example.cafecrm.dto.UpdateMenuItemRequest;
+import org.example.cafecrm.domain.dto.menu.CreateMenuCategoryRequest;
+import org.example.cafecrm.domain.dto.menu.CreateMenuItemRequest;
+import org.example.cafecrm.domain.dto.menu.UpdateMenuItemRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

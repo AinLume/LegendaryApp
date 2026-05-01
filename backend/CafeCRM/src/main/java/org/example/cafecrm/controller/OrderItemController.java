@@ -2,8 +2,8 @@ package org.example.cafecrm.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.cafecrm.dto.UpdateOrderItemStatusRequest;
-import org.example.cafecrm.enums.OrderItemStatus;
+import org.example.cafecrm.domain.dto.order.UpdateOrderItemStatusRequest;
+import org.example.cafecrm.domain.values.OrderItemStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

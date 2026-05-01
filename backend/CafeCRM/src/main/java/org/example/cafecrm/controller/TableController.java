@@ -1,9 +1,9 @@
 package org.example.cafecrm.controller;
 
 import jakarta.validation.Valid;
-import org.example.cafecrm.dto.CreateTableRequest;
-import org.example.cafecrm.dto.UpdateTablePositionRequest;
-import org.example.cafecrm.dto.UpdateTableStatusRequest;
+import org.example.cafecrm.domain.dto.table.CreateTableRequest;
+import org.example.cafecrm.domain.dto.table.UpdateTablePositionRequest;
+import org.example.cafecrm.domain.dto.table.UpdateTableStatusRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

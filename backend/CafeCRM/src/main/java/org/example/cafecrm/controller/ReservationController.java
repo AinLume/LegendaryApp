@@ -2,7 +2,7 @@ package org.example.cafecrm.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.cafecrm.dto.CreateReservationRequest;
+import org.example.cafecrm.domain.dto.reservation.CreateReservationRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
