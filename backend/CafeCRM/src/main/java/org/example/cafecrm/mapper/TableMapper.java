@@ -5,9 +5,11 @@ import org.example.cafecrm.domain.dto.table.TableResponse;
 import org.example.cafecrm.domain.entity.Tables;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface TableMapper {
+    MenuItemMapper INSTANCE = Mappers.getMapper(MenuItemMapper.class);
 
     @Mapping(target = "tableId", source = "id")
     TableResponse toResponse(Tables entity);
