@@ -1,7 +1,6 @@
 package org.example.cafecrm.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.example.cafecrm.domain.dto.table.CreateTableRequest;
 import org.example.cafecrm.domain.dto.table.TableResponse;
 import org.example.cafecrm.domain.dto.table.UpdateTablePositionRequest;
