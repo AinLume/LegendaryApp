@@ -83,6 +83,7 @@ public class MenuService {
         }
 
         MenuItem entity = menuItemMapper.toEntity(dto);
+        entity.setCategory(menuCategory);
 
         return menuItemMapper.toResponse(menuItemRepository.save(entity));
     }
@@ -90,7 +91,7 @@ public class MenuService {
     @Transactional
     public MenuItemResponse updateMenuItem(Long id, UpdateMenuItemRequest dto) {
 
-        getMenuCategoryById(dto.categoryId());
+        MenuCategory menuCategory = getMenuCategoryById(dto.categoryId());
 
         MenuItem entity = menuItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
@@ -98,6 +99,7 @@ public class MenuService {
                 ));
 
         menuItemMapper.updateEntityFromRequest(dto, entity);
+        entity.setCategory(menuCategory);
 
         return menuItemMapper.toResponse(menuItemRepository.save(entity));
     }
