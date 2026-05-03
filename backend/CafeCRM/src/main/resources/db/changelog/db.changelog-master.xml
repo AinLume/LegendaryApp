@@ -5,6 +5,5 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <include file="migrations/db.changelog-1.0-initial.xml" relativeToChangelogFile="true"/>
-    <include file="migrations/db.changelog-1.1-update-table-reservation.sql" relativeToChangelogFile="true"/>
     <include file="migrations/db.changelog-1.2-update-table-menu-item.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
