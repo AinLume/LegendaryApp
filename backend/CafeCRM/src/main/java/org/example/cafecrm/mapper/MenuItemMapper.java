@@ -18,6 +18,7 @@ public interface MenuItemMapper {
     @Mapping(target = "createdAt",  ignore = true)
     MenuItem toEntity(CreateMenuItemRequest dto);
 
+    @Mapping(target = "menuItemId", source = "id")
     @Mapping(target = "categoryId", source = "category.id")
     MenuItemResponse toResponse(MenuItem dto);
 

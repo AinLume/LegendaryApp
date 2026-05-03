@@ -84,6 +84,7 @@ public class MenuService {
 
         MenuItem entity = menuItemMapper.toEntity(dto);
         entity.setCategory(menuCategory);
+        entity.setIsAvailable(true);
 
         return menuItemMapper.toResponse(menuItemRepository.save(entity));
     }

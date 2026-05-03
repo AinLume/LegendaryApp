@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="001-menu-item-cascade-delete" author="AinLume">
+
+        <preConditions>
+            <tableExists tableName="menu_item"/>
+            <foreignKeyConstraintExists foreignKeyName="fk_menu_item_category"/>
+        </preConditions>
+
+        <dropForeignKeyConstraint
+                baseTableName="menu_item"
+                constraintName="fk_menu_item_category"/>
+
+        <addForeignKeyConstraint
+                baseTableName="menu_item"
+                baseColumnNames="menu_category_id"
+                constraintName="fk_menu_item_category"
+                referencedTableName="menu_category"
+                referencedColumnNames="menu_category_id"
+                onDelete="CASCADE"/>
+
+    </changeSet>
+</databaseChangeLog>
