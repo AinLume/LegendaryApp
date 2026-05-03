@@ -4,7 +4,7 @@ import org.example.cafecrm.domain.values.MenuItemType;
 
 public record MenuItemResponse(
         Long menuItemId,
-        MenuCategoryResponse category,
+        Integer categoryId,
         String name,
         String description,
         Long price,
