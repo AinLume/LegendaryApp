@@ -32,6 +32,14 @@ public class MenuService {
     }
 
     @Transactional(readOnly = true)
+    public MenuItem getMenuItemById(Long id) {
+        return menuItemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Menu item with id - %d not found", id)
+                ));
+    }
+
+    @Transactional(readOnly = true)
     public List<MenuCategoryDetailResponse> getAllMenuCategoriesWithItems() {
         return menuCategoryRepository.findAllCategoriesWithItems()
                 .stream()
