@@ -8,6 +8,7 @@ import org.example.cafecrm.domain.entity.Client;
 import org.example.cafecrm.exception.NotFoundException;
 import org.example.cafecrm.mapper.ClientMapper;
 import org.example.cafecrm.repository.ClientRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,7 @@ public class ClientService {
 
     private final ClientRepository clientRepository;
     private final ClientMapper clientMapper;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Возвращает сущность клиента по идентификатору.
@@ -108,8 +110,10 @@ public class ClientService {
     @Transactional
     public ClientDto create(ClientCreateRequest request) {
         Client client = clientMapper.toEntity(request);
-        Client saved = clientRepository.save(client);
-        return clientMapper.toDto(saved);
+
+        client.setPassword(passwordEncoder.encode(client.getPassword()));
+
+        return clientMapper.toDto(clientRepository.save(client));
     }
 
     /**

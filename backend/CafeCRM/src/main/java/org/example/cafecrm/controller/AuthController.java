@@ -65,7 +65,8 @@ public class AuthController {
     public ResponseEntity<@NotNull ClientDto> registerClient(
             @RequestBody @Valid
             @Parameter(description = "Данные для регистрации клиента", required = true)
-            ClientCreateRequest request) {
+            ClientCreateRequest request
+    ) {
         ClientDto created = clientService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -90,7 +91,8 @@ public class AuthController {
     public ResponseEntity<@NotNull StaffDto> registerStaff(
             @RequestBody @Valid
             @Parameter(description = "Данные для регистрации сотрудника", required = true)
-            StaffCreateRequest request) {
+            StaffCreateRequest request
+    ) {
         StaffDto created = staffService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }

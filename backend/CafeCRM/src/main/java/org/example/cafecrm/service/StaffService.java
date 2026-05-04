@@ -8,6 +8,7 @@ import org.example.cafecrm.domain.entity.Staff;
 import org.example.cafecrm.exception.NotFoundException;
 import org.example.cafecrm.mapper.StaffMapper;
 import org.example.cafecrm.repository.StaffRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class StaffService {
 
     private final StaffRepository staffRepository;
     private final StaffMapper staffMapper;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Возвращает сущность сотрудника по идентификатору.
@@ -106,6 +108,8 @@ public class StaffService {
     public StaffDto create(StaffCreateRequest request) {
 
         Staff staff = staffMapper.toEntity(request);
+
+        staff.setPassword(passwordEncoder.encode(staff.getPassword()));
 
         return staffMapper.toDto(staffRepository.save(staff));
     }
