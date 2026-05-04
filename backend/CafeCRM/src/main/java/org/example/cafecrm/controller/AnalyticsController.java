@@ -6,6 +6,8 @@ import org.example.cafecrm.domain.dto.analytics.HourlyLoadDto;
 import org.example.cafecrm.domain.dto.analytics.PopularItemsDto;
 import org.example.cafecrm.service.AnalyticsService;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,8 +47,9 @@ public class AnalyticsController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<@NotNull PopularItemsDto> getPopularItems(
             @RequestParam @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+            @RequestParam @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+            @PageableDefault(size = 10) Pageable pageable) {
 
-        return ResponseEntity.ok(analyticsService.getPopularItems(start, end));
+        return ResponseEntity.ok(analyticsService.getPopularItems(start, end, pageable));
     }
 }

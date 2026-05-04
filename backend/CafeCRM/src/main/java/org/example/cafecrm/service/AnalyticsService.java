@@ -6,6 +6,9 @@ import org.example.cafecrm.domain.dto.analytics.HourlyLoadDto;
 import org.example.cafecrm.domain.dto.analytics.PopularItemsDto;
 import org.example.cafecrm.repository.OrderItemRepository;
 import org.example.cafecrm.repository.OrderRepository;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,20 +97,21 @@ public class AnalyticsService {
     }
 
     /**
-     * Популярные блюда за период (топ по выручке).
+     * Популярные блюда за период с пагинацией.
      *
-     * @param start начало периода
-     * @param end   конец периода
-     * @return DTO с топом блюд
+     * @param start    начало периода
+     * @param end      конец периода
+     * @param pageable параметры пагинации (page, size)
+     * @return DTO с топом блюд и метаданными пагинации
      */
     @Transactional(readOnly = true)
-    public PopularItemsDto getPopularItems(LocalDate start, LocalDate end) {
+    public PopularItemsDto getPopularItems(LocalDate start, LocalDate end, Pageable pageable) {
         LocalDateTime startDateTime = start.atStartOfDay();
         LocalDateTime endDateTime = end.atTime(LocalTime.MAX);
 
-        List<Object[]> rawData = orderItemRepository.findPopularItems(startDateTime, endDateTime);
+        Page<Object @NotNull []> page = orderItemRepository.findPopularItems(startDateTime, endDateTime, pageable);
 
-        List<PopularItemsDto.ItemStat> topItems = rawData.stream()
+        List<PopularItemsDto.ItemStat> topItems = page.getContent().stream()
                 .map(row -> new PopularItemsDto.ItemStat(
                         ((Number) row[0]).longValue(),
                         (String) row[1],
@@ -121,7 +125,11 @@ public class AnalyticsService {
         return new PopularItemsDto(
                 start.format(DATE_FORMATTER),
                 end.format(DATE_FORMATTER),
-                topItems
+                topItems,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
         );
     }
 }

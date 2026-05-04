@@ -4,6 +4,8 @@ import org.example.cafecrm.domain.entity.OrderItem;
 import org.example.cafecrm.domain.values.Destination;
 import org.example.cafecrm.domain.values.OrderItemStatus;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,7 +20,7 @@ public interface OrderItemRepository extends JpaRepository<@NotNull OrderItem, @
     List<OrderItem> findAllByDestinationAndStatus(Destination destination, OrderItemStatus status);
 
     /**
-     * Популярные блюда за период.
+     * Популярные блюда за период с пагинацией.
      */
     @Query("""
         SELECT oi.menuItem.id,
@@ -34,6 +36,7 @@ public interface OrderItemRepository extends JpaRepository<@NotNull OrderItem, @
         GROUP BY oi.menuItem.id, oi.menuItem.name, oi.menuItem.category.name
         ORDER BY SUM(oi.menuItem.price * oi.quantity) DESC
         """)
-    List<Object[]> findPopularItems(@Param("start") LocalDateTime start,
-                                    @Param("end") LocalDateTime end);
+    Page<Object @NotNull []> findPopularItems(@Param("start") LocalDateTime start,
+                                              @Param("end") LocalDateTime end,
+                                              Pageable pageable);
 }
