@@ -31,12 +31,12 @@ public class OrderItemController {
     private final OrderItemService orderItemService;
 
     @GetMapping("/kitchen")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('COOK')")
     @Operation(
             summary = "Получить позиции для кухни",
             description = "Возвращает список позиций заказа, назначенных на кухню (Destination.KITCHEN). " +
                     "Опционально фильтрует по статусу приготовления. " +
-                    "Доступно любому аутентифицированному пользователю."
+                    "Доступно пользователю с ролью COOK."
     )
     @ApiResponses({
             @ApiResponse(
@@ -55,12 +55,12 @@ public class OrderItemController {
     }
 
     @GetMapping("/bar")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('BARTENDER')")
     @Operation(
             summary = "Получить позиции для бара",
             description = "Возвращает список позиций заказа, назначенных на бар (Destination.BAR). " +
                     "Опционально фильтрует по статусу приготовления. " +
-                    "Доступно любому аутентифицированному пользователю."
+                    "Доступно пользователю с ролью BARTENDER."
     )
     @ApiResponses({
             @ApiResponse(
