@@ -164,28 +164,28 @@ public class OrderService {
      *
      * @param request  данные для создания заказа
      * @param staffId  идентификатор сотрудника, оформляющего заказ
+     * @param clientId  идентификатор клиента, оформляющего заказ самостоятельно
      * @return DTO созданного заказа
      * @throws NotFoundException если сотрудник, столик, клиент или позиция меню не найдены
      * @throws ConflictException если не указаны обязательные поля для выбранного типа заказа
      */
     @Transactional
-    public OrderResponse create(CreateOrderRequest request, Long staffId) {
+    public OrderResponse create(CreateOrderRequest request, Long staffId, Long clientId) {
         validateOrderType(request);
 
         Order order = orderMapper.toEntity(request);
-        Staff staff = staffService.getEntityById(staffId);
-        order.setStaff(staff);
+
+        if (staffId != null) {
+            Staff staff = staffService.getEntityById(staffId);
+            order.setStaff(staff);
+        }
 
         if (request.type() == OrderType.DINE_IN) {
-
             Tables table = tableService.getTableById(request.tableId());
-
             order.setTable(table);
         }
         else if (request.type() == OrderType.DELIVERY) {
-
-            Client client = clientService.getEntityById(request.clientId());
-
+            Client client = clientService.getEntityById(clientId);
             order.setClient(client);
             order.setDeliveryAddress(request.deliveryAddress());
         }
@@ -197,8 +197,7 @@ public class OrderService {
 
         order.setItems(items);
 
-        long totalAmount = items
-                .stream()
+        long totalAmount = items.stream()
                 .mapToLong(item -> item.getMenuItem().getPrice() * item.getQuantity())
                 .sum();
         order.setTotalAmount(totalAmount);

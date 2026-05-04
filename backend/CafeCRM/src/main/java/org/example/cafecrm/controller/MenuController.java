@@ -7,6 +7,7 @@ import org.example.cafecrm.domain.dto.menu.*;
 import org.example.cafecrm.service.MenuService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class MenuController {
     private final MenuService menuService;
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<@NotNull List<MenuCategoryDetailResponse>> getAllCategoriesWithItems() {
 
         log.info("MenuController:getAllCategoriesWithItems.start");
@@ -34,6 +36,7 @@ public class MenuController {
     }
 
     @GetMapping("/items")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<@NotNull MenuCategoryDetailResponse> getAllItemsByCategoryId(
             @RequestParam Integer categoryId
     ) {
@@ -47,6 +50,7 @@ public class MenuController {
     }
 
     @PostMapping("/categories")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COOK', 'BARTENDER')")
     public ResponseEntity<@NotNull MenuCategoryResponse> createCategory(
             @RequestBody @Valid CreateMenuCategoryRequest request
     ) {
@@ -60,6 +64,7 @@ public class MenuController {
     }
 
     @PostMapping("/items")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COOK', 'BARTENDER')")
     public ResponseEntity<@NotNull MenuItemResponse> createItem(@RequestBody @Valid CreateMenuItemRequest request) {
 
         log.info("MenuController:createItem.start, dto: {}", request);
@@ -72,6 +77,7 @@ public class MenuController {
     }
 
     @PutMapping("/items/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COOK', 'BARTENDER')")
     public ResponseEntity<@NotNull MenuItemResponse> updateItem(
             @PathVariable Long id,
             @RequestBody @Valid UpdateMenuItemRequest request
@@ -86,6 +92,7 @@ public class MenuController {
     }
 
     @DeleteMapping("/categories/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COOK', 'BARTENDER')")
     public ResponseEntity<@NotNull Void> deleteCategory(@PathVariable Integer id) {
 
         log.info("MenuController:deleteCategory.start, categoryId: {}",  id);
@@ -98,6 +105,7 @@ public class MenuController {
     }
 
     @DeleteMapping("/items/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COOK', 'BARTENDER')")
     public ResponseEntity<@NotNull Void> deleteItem(@PathVariable Long id) {
 
         log.info("MenuController:deleteItem.start, itemId: {}",  id);
