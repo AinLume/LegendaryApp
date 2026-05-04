@@ -19,8 +19,6 @@ public interface OrderRepository extends JpaRepository<@NotNull Order, @NotNull 
 
     List<Order> findAllByClientId(Long clientId);
 
-    List<Order> findAllByStatusAndType(OrderStatus status, OrderType type);
-
     /**
      * Средний чек и общая выручка за период (только закрытые/оплаченные заказы).
      */

@@ -61,20 +61,6 @@ public class OrderItemService {
     }
 
     /**
-     * Возвращает DTO позиции заказа по идентификатору.
-     * <p>
-     * Переиспользует {@link #getEntityById(Long)} для получения сущности.
-     *
-     * @param id идентификатор позиции заказа
-     * @return DTO с данными позиции
-     * @throws NotFoundException если позиция с указанным id не существует
-     */
-    @Transactional(readOnly = true)
-    public OrderItemResponse getById(Long id) {
-        return orderItemMapper.toResponse(getEntityById(id));
-    }
-
-    /**
      * Возвращает позиции заказа для кухни.
      * <p>
      * Фильтрует по назначению {@link Destination#KITCHEN}.

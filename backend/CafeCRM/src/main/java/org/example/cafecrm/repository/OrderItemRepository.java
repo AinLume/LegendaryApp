@@ -17,8 +17,6 @@ public interface OrderItemRepository extends JpaRepository<@NotNull OrderItem, @
 
     List<OrderItem> findAllByDestinationAndStatus(Destination destination, OrderItemStatus status);
 
-    List<OrderItem> findAllByOrderId(Long orderId);
-
     /**
      * Популярные блюда за период.
      */
