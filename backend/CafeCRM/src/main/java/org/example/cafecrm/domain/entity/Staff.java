@@ -11,6 +11,8 @@ import org.example.cafecrm.domain.values.StaffRole;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "staff")
@@ -46,9 +48,9 @@ public class Staff {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-//    @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY)
-//    private List<Order> orders = new ArrayList<>();
-//
-//    @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY)
-//    private List<Reservation> reservations = new ArrayList<>();
+    @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY)
+    private List<Order> orders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY)
+    private List<Reservation> reservations = new ArrayList<>();
 }
