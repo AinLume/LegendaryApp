@@ -17,6 +17,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Сервис управления позициями заказа.
+ * <p>
+ * Обеспечивает работу кухни и бара с позициями заказа ({@link OrderItem}).
+ * Предоставляет фильтрацию по назначению (кухня/бар) и управление статусом
+ * приготовления позиций.
+ * <p>
+ * При изменении статуса позиции публикует событие {@link OrderItemStatusChangedEvent}
+ * через {@link ApplicationEventPublisher}, что позволяет {@link OrderService}
+ * асинхронно проверить готовность всех позиций и обновить статус заказа.
+ * <p>
+ * Валидация переходов статусов: NEW → IN_PROGRESS → READY.
+ * Обратные переходы и повторные изменения запрещены.
+ *
+ * @author AinLume
+ * @see OrderItem
+ * @see OrderService
+ * @see ApplicationEventPublisher
+ */
 @Service
 @RequiredArgsConstructor
 public class OrderItemService {
@@ -26,17 +45,45 @@ public class OrderItemService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * Возвращает сущность позиции заказа по идентификатору.
+     * <p>
+     * Базовый метод, переиспользуемый другими методами сервиса.
+     *
+     * @param id идентификатор позиции заказа
+     * @return найденная сущность {@link OrderItem}
+     * @throws NotFoundException если позиция с указанным id не существует
+     */
     @Transactional(readOnly = true)
     public OrderItem getEntityById(Long id) {
         return orderItemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("Order item with id %d does not exist", id)));
     }
 
+    /**
+     * Возвращает DTO позиции заказа по идентификатору.
+     * <p>
+     * Переиспользует {@link #getEntityById(Long)} для получения сущности.
+     *
+     * @param id идентификатор позиции заказа
+     * @return DTO с данными позиции
+     * @throws NotFoundException если позиция с указанным id не существует
+     */
     @Transactional(readOnly = true)
     public OrderItemResponse getById(Long id) {
         return orderItemMapper.toResponse(getEntityById(id));
     }
 
+    /**
+     * Возвращает позиции заказа для кухни.
+     * <p>
+     * Фильтрует по назначению {@link Destination#KITCHEN}.
+     * Опционально фильтрует по статусу приготовления.
+     *
+     * @param status опциональный фильтр по статусу (null — все статусы)
+     * @return список DTO позиций для кухни;
+     *         пустой список, если позиций нет
+     */
     @Transactional(readOnly = true)
     public List<OrderItemResponse> getKitchenItems(OrderItemStatus status) {
         if (status != null) {
@@ -51,6 +98,16 @@ public class OrderItemService {
                 .toList();
     }
 
+    /**
+     * Возвращает позиции заказа для бара.
+     * <p>
+     * Фильтрует по назначению {@link Destination#BAR}.
+     * Опционально фильтрует по статусу приготовления.
+     *
+     * @param status опциональный фильтр по статусу (null — все статусы)
+     * @return список DTO позиций для бара;
+     *         пустой список, если позиций нет
+     */
     @Transactional(readOnly = true)
     public List<OrderItemResponse> getBarItems(OrderItemStatus status) {
         if (status != null) {
@@ -63,6 +120,22 @@ public class OrderItemService {
                 .toList();
     }
 
+    /**
+     * Обновляет статус позиции заказа.
+     * <p>
+     * Валидирует допустимость перехода статуса перед изменением.
+     * После сохранения публикует событие {@link OrderItemStatusChangedEvent}
+     * для асинхронного обновления статуса родительского заказа.
+     * <p>
+     * Допустимые переходы: NEW → IN_PROGRESS → READY.
+     * Из READY изменение запрещено. Пропуск IN_PROGRESS запрещён.
+     *
+     * @param id      идентификатор позиции
+     * @param request новый статус
+     * @return DTO обновлённой позиции
+     * @throws NotFoundException если позиция не найдена
+     * @throws ConflictException если переход статуса недопустим
+     */
     @Transactional
     public OrderItemResponse updateStatus(Long id, UpdateOrderItemStatusRequest request) {
         OrderItem item = getEntityById(id);
@@ -77,6 +150,21 @@ public class OrderItemService {
         return orderItemMapper.toResponse(updated);
     }
 
+    /**
+     * Валидирует допустимость перехода статуса позиции.
+     * <p>
+     * Конечный автомат статусов:
+     * <ul>
+     *   <li>NEW → IN_PROGRESS — допустимо</li>
+     *   <li>IN_PROGRESS → READY — допустимо</li>
+     *   <li>NEW → READY — запрещено (требуется IN_PROGRESS)</li>
+     *   <li>READY → * — запрещено (позиция готова)</li>
+     * </ul>
+     *
+     * @param current текущий статус позиции
+     * @param next    запрашиваемый новый статус
+     * @throws ConflictException если переход недопустим
+     */
     private void validateStatusTransition(OrderItemStatus current, OrderItemStatus next) {
         if (current == OrderItemStatus.READY) {
             throw new ConflictException("Cannot change status of ready item");

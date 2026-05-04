@@ -19,6 +19,23 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Сервис управления бронированиями столиков.
+ * <p>
+ * Обеспечивает создание, отмену и просмотр бронирований ({@link Reservation}),
+ * а также поиск доступных столиков на заданный временной интервал.
+ * <p>
+ * При создании бронирования выполняется валидация вместимости столика
+ * и проверка отсутствия конфликтующих бронирований на выбранное время.
+ * <p>
+ * Отмена возможна только для активных бронирований ({@link ReservationStatus#ACTIVE})
+ * и только до момента окончания бронирования.
+ *
+ * @author AinLume
+ * @see Reservation
+ * @see Tables
+ * @see TableService
+ */
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -28,17 +45,41 @@ public class ReservationService {
     private final TableService tableService;
     private final StaffService staffService;
 
+    /**
+     * Возвращает сущность бронирования по идентификатору.
+     * <p>
+     * Базовый метод, переиспользуемый другими методами сервиса.
+     *
+     * @param id идентификатор бронирования
+     * @return найденная сущность {@link Reservation}
+     * @throws NotFoundException если бронирование с указанным id не существует
+     */
     @Transactional(readOnly = true)
     public Reservation getEntityById(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("Reservation with id %d does not exist", id)));
     }
 
+    /**
+     * Возвращает DTO бронирования по идентификатору.
+     * <p>
+     * Переиспользует {@link #getEntityById(Long)} для получения сущности.
+     *
+     * @param id идентификатор бронирования
+     * @return DTO с данными бронирования
+     * @throws NotFoundException если бронирование с указанным id не существует
+     */
     @Transactional(readOnly = true)
     public ReservationResponse getById(Long id) {
         return reservationMapper.toResponse(getEntityById(id));
     }
 
+    /**
+     * Возвращает все бронирования.
+     *
+     * @return список DTO всех бронирований;
+     *         пустой список, если бронирований нет
+     */
     @Transactional(readOnly = true)
     public List<ReservationResponse> getAll() {
         return reservationRepository.findAll()
@@ -47,6 +88,22 @@ public class ReservationService {
                 .toList();
     }
 
+    /**
+     * Возвращает доступные столики на указанный временной интервал.
+     * <p>
+     * Фильтрует столики по вместимости (должна быть не меньше запрошенного
+     * количества персон) и проверяет отсутствие конфликтующих бронирований.
+     * <p>
+     * Временной интервал должен быть корректным: {@code startTime} строго
+     * раньше {@code endTime}.
+     *
+     * @param startTime начало временного интервала
+     * @param endTime   конец временного интервала
+     * @param persons   требуемое количество мест
+     * @return список кратких DTO доступных столиков;
+     *         пустой список, если подходящих столиков нет
+     * @throws ConflictException если {@code startTime} не раньше {@code endTime}
+     */
     @Transactional(readOnly = true)
     public List<TableShortResponse> getAvailableTables(LocalDateTime startTime, LocalDateTime endTime, Integer persons) {
         if (startTime.isAfter(endTime) || startTime.isEqual(endTime)) {
@@ -62,6 +119,26 @@ public class ReservationService {
                 .toList();
     }
 
+    /**
+     * Создаёт новое бронирование.
+     * <p>
+     * Выполняет валидации:
+     * <ul>
+     *   <li>Временной интервал корректен ({@code startTime} &lt; {@code endTime})</li>
+     *   <li>Вместимость столика не меньше количества персон</li>
+     *   <li>Столик свободен на запрошенное время (нет конфликтующих бронирований)</li>
+     * </ul>
+     * <p>
+     * Назначает сотрудника, оформившего бронирование, и устанавливает
+     * начальный статус {@link ReservationStatus#ACTIVE}.
+     *
+     * @param request данные для создания бронирования
+     * @param staffId идентификатор сотрудника, оформляющего бронирование
+     * @return DTO созданного бронирования
+     * @throws NotFoundException если столик или сотрудник не найдены
+     * @throws ConflictException если временной интервал некорректен,
+     *                           вместимость недостаточна или столик занят
+     */
     @Transactional
     public ReservationResponse create(CreateReservationRequest request, Long staffId) {
         if (request.startTime().isAfter(request.endTime()) || request.startTime().isEqual(request.endTime())) {
@@ -93,6 +170,22 @@ public class ReservationService {
         return reservationMapper.toResponse(saved);
     }
 
+    /**
+     * Отменяет бронирование.
+     * <p>
+     * Переводит статус бронирования в {@link ReservationStatus#CANCELLED}.
+     * <p>
+     * Отмена невозможна, если:
+     * <ul>
+     *   <li>Бронирование уже отменено</li>
+     *   <li>Время окончания бронирования уже прошло</li>
+     * </ul>
+     *
+     * @param id идентификатор бронирования
+     * @return DTO отменённого бронирования
+     * @throws NotFoundException если бронирование не найдено
+     * @throws ConflictException если бронирование уже отменено или является прошедшим
+     */
     @Transactional
     public ReservationResponse cancel(Long id) {
         Reservation reservation = getEntityById(id);

@@ -16,6 +16,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Сервис управления столиками.
+ * <p>
+ * Обеспечивает CRUD-операции для сущности {@link Tables}:
+ * создание, получение, обновление статуса и позиции, удаление.
+ * <p>
+ * При создании столика проверяет уникальность номера и устанавливает
+ * начальный статус {@link TableStatus#FREE}.
+ * <p>
+ * Обновление статуса и позиции являются идемпотентными операциями:
+ * если новое значение совпадает с текущим, сохранение не выполняется.
+ * <p>
+ * Используется {@link ReservationService} для поиска доступных столиков
+ * и {@link OrderService} для привязки заказов к столикам.
+ *
+ * @author AinLume
+ * @see Tables
+ * @see TableMapper
+ * @see ReservationService
+ * @see OrderService
+ */
 @Service
 @RequiredArgsConstructor
 public class TableService {
@@ -23,12 +44,32 @@ public class TableService {
     private final TableRepository tableRepository;
     private final TableMapper mapper;
 
+    /**
+     * Возвращает сущность столика по идентификатору.
+     * <p>
+     * Базовый метод, переиспользуемый другими методами сервиса
+     * и внешними сервисами (например, {@link OrderService}, {@link ReservationService}).
+     *
+     * @param id идентификатор столика
+     * @return найденная сущность {@link Tables}
+     * @throws NotFoundException если столик с указанным id не существует
+     */
     @Transactional(readOnly = true)
     public Tables getTableById(Integer id) {
         return tableRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("Table with id %d does not exist", id)));
     }
 
+    /**
+     * Создаёт новый столик.
+     * <p>
+     * Проверяет уникальность номера столика. При дублировании выбрасывает
+     * исключение. Устанавливает начальный статус {@link TableStatus#FREE}.
+     *
+     * @param dto данные для создания столика
+     * @return DTO созданного столика
+     * @throws ConflictException если столик с таким номером уже существует
+     */
     @Transactional
     public TableResponse create(CreateTableRequest dto) {
 
@@ -44,6 +85,12 @@ public class TableService {
         return mapper.toResponse(tableRepository.save(table));
     }
 
+    /**
+     * Возвращает все столики.
+     *
+     * @return список DTO всех столиков;
+     *         пустой список, если столиков нет
+     */
     @Transactional(readOnly = true)
     public List<TableResponse> findAll() {
         return tableRepository.findAll()
@@ -52,6 +99,15 @@ public class TableService {
                 .toList();
     }
 
+    /**
+     * Удаляет столик по идентификатору.
+     * <p>
+     * Выполняет физическое удаление записи из базы данных.
+     * Проверяет существование столика перед удалением.
+     *
+     * @param id идентификатор удаляемого столика
+     * @throws NotFoundException если столик с указанным id не существует
+     */
     @Transactional
     public void deleteTableById(Integer id) {
 
@@ -62,6 +118,17 @@ public class TableService {
         tableRepository.deleteById(id);
     }
 
+    /**
+     * Обновляет статус столика.
+     * <p>
+     * Идемпотентная операция: если запрошенный статус совпадает
+     * с текущим, возвращает текущий DTO без сохранения.
+     *
+     * @param id  идентификатор столика
+     * @param dto запрос с новым статусом
+     * @return DTO столика с обновлённым статусом
+     * @throws NotFoundException если столик с указанным id не существует
+     */
     @Transactional
     public TableResponse updateTableStatusById(Integer id, UpdateTableStatusRequest dto) {
         Tables table = getTableById(id);
@@ -73,6 +140,17 @@ public class TableService {
         return mapper.toResponse(tableRepository.save(table));
     }
 
+    /**
+     * Обновляет позицию столика на плане зала.
+     * <p>
+     * Идемпотентная операция: если запрошенные координаты совпадают
+     * с текущими, возвращает текущий DTO без сохранения.
+     *
+     * @param id  идентификатор столика
+     * @param dto запрос с новыми координатами
+     * @return DTO столика с обновлённой позицией
+     * @throws NotFoundException если столик с указанным id не существует
+     */
     @Transactional
     public TableResponse updateTablePosition(Integer id, UpdateTablePositionRequest dto) {
         Tables table = getTableById(id);
