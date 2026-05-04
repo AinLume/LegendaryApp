@@ -10,6 +10,7 @@ FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
 COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /app/src/main/resources/keys /app/keys
 
 RUN mkdir -p /app/logs && \
     addgroup --system spring && \

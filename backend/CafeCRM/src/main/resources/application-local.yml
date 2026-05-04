@@ -26,3 +26,13 @@ spring:
   liquibase:
     contexts: dev
     drop-first: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:keys/publicKey.pem
+
+application:
+  private-key-path: classpath:keys/privateKey.pem
+  public-key-path: classpath:keys/publicKey.pem

@@ -51,6 +51,21 @@ public class StaffService {
     }
 
     /**
+     * Возвращает сотрудника по адресу электронной почты.
+     * <p>
+     * Используется в процессе аутентификации ({@code Auth}) для поиска
+     * существующего сотрудника по предоставленному email.
+     *
+     * @param email адрес электронной почты сотрудника
+     * @return найденная сущность {@link Staff} или {@code null}, если сотрудник не найден
+     * @see org.example.cafecrm.controller.AuthController
+     */
+    @Transactional(readOnly = true)
+    public Staff getStaffByEmail(String email) {
+        return staffRepository.findByEmail(email);
+    }
+
+    /**
      * Возвращает DTO сотрудника по идентификатору.
      * <p>
      * Переиспользует {@link #getEntityById(Long)} для получения сущности.

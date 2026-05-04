@@ -69,6 +69,21 @@ public class ClientService {
     }
 
     /**
+     * Возвращает клиента по номеру телефона.
+     * <p>
+     * Используется в процессе аутентификации ({@code Auth}) для поиска
+     * существующего клиента по предоставленному номеру телефона.
+     *
+     * @param phoneNumber номер телефона клиента
+     * @return найденная сущность {@link Client} или {@code null}, если клиент не найден
+     * @see org.example.cafecrm.controller.AuthController
+     */
+    @Transactional(readOnly = true)
+    public Client findByPhoneNumber(String phoneNumber) {
+        return clientRepository.findByPhone(phoneNumber);
+    }
+
+    /**
      * Возвращает список всех клиентов.
      *
      * @return список DTO всех клиентов, отсортированных по умолчанию (id);
