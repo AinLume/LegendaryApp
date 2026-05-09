@@ -182,13 +182,16 @@ public class OrderService {
             order.setStaff(staff);
         }
 
+        if  (clientId != null) {
+            Client client = clientService.getEntityById(clientId);
+            order.setClient(client);
+        }
+
         if (request.type() == OrderType.DINE_IN) {
             Tables table = tableService.getTableById(request.tableId());
             order.setTable(table);
         }
         else if (request.type() == OrderType.DELIVERY) {
-            Client client = clientService.getEntityById(clientId);
-            order.setClient(client);
             order.setDeliveryAddress(request.deliveryAddress());
         }
 
