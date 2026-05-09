@@ -1,6 +1,7 @@
 package org.example.cafecrm.mapper;
 
 import org.example.cafecrm.domain.dto.table.CreateTableRequest;
+import org.example.cafecrm.domain.dto.table.TableShortResponse;
 import org.example.cafecrm.domain.dto.table.TableResponse;
 import org.example.cafecrm.domain.entity.Tables;
 import org.mapstruct.Mapper;
@@ -13,6 +14,9 @@ public interface TableMapper {
 
     @Mapping(target = "tableId", source = "id")
     TableResponse toResponse(Tables entity);
+
+    @Mapping(target = "tableId", source = "id")
+    TableShortResponse toShortResponse(Tables entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "orders", ignore = true)

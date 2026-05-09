@@ -336,7 +336,6 @@ public class OrderService {
         MenuItem menuItem = menuService.getMenuItemById(request.menuItemId());
         item.setMenuItem(menuItem);
 
-        // Set destination based on menu item type: FOOD -> KITCHEN, DRINK -> BAR
         item.setDestination(menuItem.getType() == MenuItemType.FOOD
                 ? Destination.KITCHEN
                 : Destination.BAR);
