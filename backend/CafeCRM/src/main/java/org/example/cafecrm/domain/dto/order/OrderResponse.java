@@ -11,6 +11,7 @@ import java.util.List;
 public record OrderResponse(
         Long orderId,
         OrderType type,
+        Integer tableId,
         TableShortResponse table,
         Long clientId,
         OrderStatus status,

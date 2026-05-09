@@ -7,6 +7,8 @@ import org.example.cafecrm.domain.dto.order.CreateOrderRequest;
 import org.example.cafecrm.domain.dto.order.OrderItemRequest;
 import org.example.cafecrm.domain.dto.order.OrderResponse;
 import org.example.cafecrm.domain.entity.*;
+import org.example.cafecrm.domain.values.Destination;
+import org.example.cafecrm.domain.values.MenuItemType;
 import org.example.cafecrm.domain.values.OrderItemStatus;
 import org.example.cafecrm.domain.values.OrderStatus;
 import org.example.cafecrm.domain.values.OrderType;
@@ -331,7 +333,13 @@ public class OrderService {
         OrderItem item = orderItemMapper.toEntity(request);
 
         item.setOrder(order);
-        item.setMenuItem(menuService.getMenuItemById(request.menuItemId()));
+        MenuItem menuItem = menuService.getMenuItemById(request.menuItemId());
+        item.setMenuItem(menuItem);
+
+        // Set destination based on menu item type: FOOD -> KITCHEN, DRINK -> BAR
+        item.setDestination(menuItem.getType() == MenuItemType.FOOD
+                ? Destination.KITCHEN
+                : Destination.BAR);
 
         return item;
     }
