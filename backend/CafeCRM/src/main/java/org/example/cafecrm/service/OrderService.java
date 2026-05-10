@@ -64,6 +64,7 @@ public class OrderService {
     private final StaffService staffService;
     private final MenuService menuService;
     private final OrderItemMapper orderItemMapper;
+    private final OrderItemService orderItemService;
 
     /**
      * Возвращает сущность заказа по идентификатору.
@@ -113,8 +114,9 @@ public class OrderService {
                 .and(OrderSpecification.hasClientId(clientId))
                 .and(OrderSpecification.hasTableId(tableId));
 
-        return orderRepository.findAll(spec, pageable)
-                .map(orderMapper::toResponse);
+        Page<@NotNull Order> orders = orderRepository.findAll(spec, pageable);
+
+        return orders.map(orderMapper::toResponse);
     }
 
     /**

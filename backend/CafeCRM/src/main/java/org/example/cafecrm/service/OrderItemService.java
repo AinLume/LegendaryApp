@@ -136,6 +136,11 @@ public class OrderItemService {
         return orderItemMapper.toResponse(updated);
     }
 
+    @Transactional
+    public List<OrderItem> saveOrderItems(List<OrderItem> entities) {
+        return orderItemRepository.saveAll(entities);
+    }
+
     /**
      * Валидирует допустимость перехода статуса позиции.
      * <p>
