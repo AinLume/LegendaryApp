@@ -64,6 +64,6 @@ public class Order {
     @Column(name = "closed_at")
     private LocalDateTime closedAt;
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> items = new ArrayList<>();
 }
