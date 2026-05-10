@@ -17,7 +17,12 @@ import org.example.cafecrm.exception.NotFoundException;
 import org.example.cafecrm.mapper.OrderItemMapper;
 import org.example.cafecrm.mapper.OrderMapper;
 import org.example.cafecrm.repository.OrderRepository;
+import org.example.cafecrm.repository.specification.OrderSpecification;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,32 +97,24 @@ public class OrderService {
     }
 
     /**
-     * Возвращает все заказы.
+     * Возвращает страницу заказов с опциональной фильтрацией.
      *
-     * @return список DTO всех заказов;
-     *         пустой список, если заказов нет
+     * @param status   фильтр по статусу (опционально)
+     * @param clientId фильтр по ID клиента (опционально)
+     * @param tableId  фильтр по ID столика (опционально)
+     * @param pageable параметры пагинации и сортировки
+     * @return страница DTO заказов
      */
     @Transactional(readOnly = true)
-    public List<OrderResponse> getAll() {
-        return orderRepository.findAll()
-                .stream()
-                .map(orderMapper::toResponse)
-                .toList();
-    }
+    public Page<@NotNull OrderResponse> getAll(OrderStatus status, Long clientId, Integer tableId, Pageable pageable) {
 
-    /**
-     * Возвращает заказы по статусу.
-     *
-     * @param status статус заказа для фильтрации
-     * @return список DTO заказов с указанным статусом;
-     *         пустой список, если заказов нет
-     */
-    @Transactional(readOnly = true)
-    public List<OrderResponse> getAllByStatus(OrderStatus status) {
-        return orderRepository.findAllByStatus(status)
-                .stream()
-                .map(orderMapper::toResponse)
-                .toList();
+        Specification<@NotNull Order> spec = Specification
+                .where(OrderSpecification.hasStatus(status))
+                .and(OrderSpecification.hasClientId(clientId))
+                .and(OrderSpecification.hasTableId(tableId));
+
+        return orderRepository.findAll(spec, pageable)
+                .map(orderMapper::toResponse);
     }
 
     /**
@@ -132,23 +129,6 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<OrderResponse> getByTable(Integer tableId) {
         return orderRepository.findAllByTableId(tableId)
-                .stream()
-                .map(orderMapper::toResponse)
-                .toList();
-    }
-
-    /**
-     * Возвращает заказы по идентификатору клиента.
-     * <p>
-     * Актуально для заказов типа {@link OrderType#DELIVERY}.
-     *
-     * @param clientId идентификатор клиента
-     * @return список DTO заказов клиента;
-     *         пустой список, если заказов нет
-     */
-    @Transactional(readOnly = true)
-    public List<OrderResponse> getByClient(Long clientId) {
-        return orderRepository.findAllByClientId(clientId)
                 .stream()
                 .map(orderMapper::toResponse)
                 .toList();

@@ -5,19 +5,17 @@ import org.example.cafecrm.domain.values.OrderStatus;
 import org.example.cafecrm.domain.values.OrderType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface OrderRepository extends JpaRepository<@NotNull Order, @NotNull Long> {
-
-    List<Order> findAllByStatus(OrderStatus status);
+public interface OrderRepository extends JpaRepository<@NotNull Order, @NotNull Long>,
+        JpaSpecificationExecutor<@NotNull Order> {
 
     List<Order> findAllByTableId(Integer tableId);
-
-    List<Order> findAllByClientId(Long clientId);
 
     /**
      * Средний чек и общая выручка за период (только закрытые/оплаченные заказы).

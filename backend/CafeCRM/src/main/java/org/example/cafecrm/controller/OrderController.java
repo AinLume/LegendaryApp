@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.example.cafecrm.domain.dto.order.CloseOrderRequest;
 import org.example.cafecrm.domain.dto.order.CreateOrderRequest;
@@ -16,6 +17,9 @@ import org.example.cafecrm.domain.dto.order.OrderResponse;
 import org.example.cafecrm.domain.values.OrderStatus;
 import org.example.cafecrm.service.OrderService;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,7 +41,9 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(
             summary = "Получить все заказы",
-            description = "Возвращает список всех заказов. При указании status фильтрует по статусу. " +
+            description = "Возвращает страницу заказов с поддержкой пагинации, сортировки и фильтрации. " +
+                    "Можно фильтровать по статусу, ID клиента и/или ID столика. " +
+                    "Параметры пагинации передаются через query-параметры: page, size, sort. " +
                     "Доступно только администратору."
     )
     @ApiResponses({
@@ -48,14 +54,23 @@ public class OrderController {
             ),
             @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN")
     })
-    public ResponseEntity<@NotNull List<OrderResponse>> getAll(
-            @RequestParam
+    public ResponseEntity<@NotNull Page<@NotNull OrderResponse>> getAll(
+            @RequestParam(required = false)
             @Parameter(description = "Фильтр по статусу заказа", example = "NEW")
-            OrderStatus status) {
-        if (status != null) {
-            return ResponseEntity.ok(orderService.getAllByStatus(status));
-        }
-        return ResponseEntity.ok(orderService.getAll());
+            OrderStatus status,
+
+            @RequestParam(required = false)
+            @Parameter(description = "Фильтр по ID клиента", example = "1")
+            Long clientId,
+
+            @RequestParam(required = false)
+            @Parameter(description = "Фильтр по ID столика", example = "1")
+            Integer tableId,
+
+            @PageableDefault(size = 20)
+            @Parameter(description = "Параметры пагинации и сортировки (page, size, sort)", example = "page=0&size=20&sort=createdAt,desc")
+            Pageable pageable) {
+        return ResponseEntity.ok(orderService.getAll(status, clientId, tableId, pageable));
     }
 
     @GetMapping("/{id}")
@@ -81,11 +96,11 @@ public class OrderController {
     }
 
     @GetMapping("/table/{tableId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
+    @PreAuthorize("hasAnyRole('WAITER')")
     @Operation(
             summary = "Получить заказы по столику",
             description = "Возвращает список заказов, привязанных к указанному столику. " +
-                    "Актуально для заказов типа DINE_IN. Доступно администраторам и официантам."
+                    "Актуально для заказов типа DINE_IN. Доступно только официантам."
     )
     @ApiResponses({
             @ApiResponse(
@@ -93,35 +108,13 @@ public class OrderController {
                     description = "Успешно",
                     content = @Content(schema = @Schema(implementation = OrderResponse.class))
             ),
-            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN или WAITER")
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль WAITER")
     })
     public ResponseEntity<@NotNull List<OrderResponse>> getByTable(
             @PathVariable
             @Parameter(description = "ID столика", example = "1")
             Integer tableId) {
         return ResponseEntity.ok(orderService.getByTable(tableId));
-    }
-
-    @GetMapping("/client/{clientId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER')")
-    @Operation(
-            summary = "Получить заказы по клиенту",
-            description = "Возвращает список заказов указанного клиента. " +
-                    "Актуально для заказов типа DELIVERY. Доступно администраторам и официантам."
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Успешно",
-                    content = @Content(schema = @Schema(implementation = OrderResponse.class))
-            ),
-            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN или WAITER")
-    })
-    public ResponseEntity<@NotNull List<OrderResponse>> getByClient(
-            @PathVariable
-            @Parameter(description = "ID клиента", example = "1")
-            Long clientId) {
-        return ResponseEntity.ok(orderService.getByClient(clientId));
     }
 
     @PostMapping
@@ -155,7 +148,7 @@ public class OrderController {
             UserDetails userDetails
     ) {
         boolean isClient = userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENT"));
+                .anyMatch(a -> Objects.equals(a.getAuthority(), "ROLE_CLIENT"));
 
         Long userId = Long.parseLong(userDetails.getUsername());
 
