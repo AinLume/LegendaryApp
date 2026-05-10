@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@jakarta.persistence.Table(name = "orders")
+@Table(name = "orders")
 @Getter
 @Setter
 @NoArgsConstructor
