@@ -1,29 +1,24 @@
-import type {FC, FormEvent} from 'react';
+import type { FC } from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Input } from '../../ui';
-import type {StaffLoginRequest} from "../../../types";
-import {authApi} from "../../../api/auth.ts";
+import { useAuth } from '../../../hooks/useAuth';
 
 export const LoginPage: FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setError(null);
-    setIsLoading(true);
 
     try {
-      const dto: StaffLoginRequest = { email, password };
-      const response = await authApi.loginStaff(dto);
-      console.log('Login successful:', response);
-      // TODO: сохранить пользователя в контекст и редирект
+      await login(email, password);
+      navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка входа');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -65,10 +60,10 @@ export const LoginPage: FC = () => {
           )}
 
           <Button
-            type="submit"
             isLoading={isLoading}
             fullWidth
             className="mt-6"
+            onClick={handleSubmit}
           >
             Войти
           </Button>
