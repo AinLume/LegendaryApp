@@ -1,7 +1,7 @@
 import type {FC, ReactNode} from 'react';
 import { useState, useEffect } from 'react';
 import { authApi } from '../../api/auth';
-import {AuthContext, type IAuthContext, type StaffUser } from '../../types';
+import {AuthContext, type IAuthContext, type StaffUser} from '../../types';
 
 export interface IProps {
   children: ReactNode;
@@ -15,8 +15,9 @@ export const AuthProvider: FC<IProps> = ({ children }) => {
   const checkAuth = async () => {
     try {
       setIsLoading(true);
-      // TODO: Добавить эндпоинт /api/auth/me для получения текущего пользователя
-      // Пока считаем, что если есть кука - пользователь авторизован
+      const response = await authApi.getMe();
+      setUser(response);
+      setIsAuthenticated(true);
     } catch (error) {
       console.error('Ошибка проверки аутентификации:', error);
       setUser(null);

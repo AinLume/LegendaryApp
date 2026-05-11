@@ -10,6 +10,11 @@ export const authApi = {
     return response.data;
   },
 
+  getMe: async (): Promise<StaffLoginResponse> => {
+    const response = await api.get<StaffLoginResponse>('/api/auth/me/staff');
+    return response.data;
+  },
+
   logout: async (): Promise<void> => {
     await api.post('/api/auth/logout');
   },
