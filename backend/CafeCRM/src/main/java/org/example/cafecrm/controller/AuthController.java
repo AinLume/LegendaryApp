@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.cafecrm.domain.dto.auth.ClientLoginRequest;
 import org.example.cafecrm.domain.dto.auth.StaffLoginRequest;
+import org.example.cafecrm.domain.dto.auth.TokenResponse;
 import org.example.cafecrm.domain.dto.client.ClientCreateRequest;
 import org.example.cafecrm.domain.dto.client.ClientDto;
 import org.example.cafecrm.domain.dto.staff.StaffCreateRequest;
@@ -28,7 +29,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -188,6 +192,32 @@ public class AuthController {
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    @Operation(
+            summary = "Обновление токена",
+            description = "Возвращает новый JWT-токен для текущего аутентифицированного пользователя. " +
+                    "Токен также обновляется в cookie. " +
+                    "Позволяет продлить сессию без повторного входа."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Токен успешно обновлён"
+            ),
+            @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<@NotNull TokenResponse> refresh(
+            Authentication authentication,
+            @Parameter(description = "HTTP-ответ для обновления cookie", hidden = true)
+            HttpServletResponse response) {
+
+        String newToken = jwtService.generateJwtToken((UserDetails) authentication.getPrincipal());
+        addJwtCookie(response, newToken);
+
         return ResponseEntity.ok().build();
     }
 

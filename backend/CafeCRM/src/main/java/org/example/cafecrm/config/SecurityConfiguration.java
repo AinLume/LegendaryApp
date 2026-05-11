@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                             "/docs/**",
                             "/api-docs/**"
                     ).permitAll()
-//                    .hasRole("ADMIN")
+                    .requestMatchers("/api/auth/me").authenticated()
                     .requestMatchers("/api/auth/**").permitAll()
                     .anyRequest().authenticated()
             )
