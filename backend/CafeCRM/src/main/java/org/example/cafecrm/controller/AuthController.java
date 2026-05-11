@@ -14,7 +14,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.cafecrm.domain.dto.auth.ClientLoginRequest;
 import org.example.cafecrm.domain.dto.auth.StaffLoginRequest;
-import org.example.cafecrm.domain.dto.auth.TokenResponse;
 import org.example.cafecrm.domain.dto.client.ClientCreateRequest;
 import org.example.cafecrm.domain.dto.client.ClientDto;
 import org.example.cafecrm.domain.dto.staff.StaffCreateRequest;
@@ -29,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.Authentication;
@@ -195,30 +195,68 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/me")
+    @GetMapping("/me/client")
     @Operation(
-            summary = "Обновление токена",
-            description = "Возвращает новый JWT-токен для текущего аутентифицированного пользователя. " +
+            summary = "Обновление токена клиента",
+            description = "Возвращает новый JWT-токен и данные клиента. " +
                     "Токен также обновляется в cookie. " +
                     "Позволяет продлить сессию без повторного входа."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "Токен успешно обновлён"
+                    description = "Токен успешно обновлён",
+                    content = @Content(schema = @Schema(implementation = ClientDto.class))
             ),
             @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
     })
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<@NotNull TokenResponse> refresh(
-            Authentication authentication,
+    @PreAuthorize("hasRole('CLIENT')")
+    public ResponseEntity<@NotNull ClientDto> refreshClient(
+            @AuthenticationPrincipal
+            UserDetails userDetails,
+
             @Parameter(description = "HTTP-ответ для обновления cookie", hidden = true)
             HttpServletResponse response) {
 
-        String newToken = jwtService.generateJwtToken((UserDetails) authentication.getPrincipal());
+        String newToken = jwtService.generateJwtToken(userDetails);
         addJwtCookie(response, newToken);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(clientService.findById(
+                Long.parseLong(userDetails.getUsername())
+        ));
+    }
+
+    @GetMapping("/me/staff")
+    @Operation(
+            summary = "Обновление токена сотрудника",
+            description = "Возвращает новый JWT-токен и данные сотрудника. " +
+                    "Токен также обновляется в cookie. " +
+                    "Позволяет продлить сессию без повторного входа."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Токен успешно обновлён",
+                    content = @Content(schema = @Schema(implementation = StaffDto.class))
+            ),
+            @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN', 'WAITER', 'COOK', 'BARTENDER')")
+    public ResponseEntity<@NotNull StaffDto> refreshStaff(
+            @AuthenticationPrincipal
+            UserDetails userDetails,
+
+            @Parameter(description = "HTTP-ответ для обновления cookie", hidden = true)
+            HttpServletResponse response
+    ) {
+        String newToken = jwtService.generateJwtToken(userDetails);
+        addJwtCookie(response, newToken);
+
+        return ResponseEntity.ok(staffService.findById(
+                Long.parseLong(userDetails.getUsername())
+        ));
     }
 
     private void addJwtCookie(HttpServletResponse response, String token) {
