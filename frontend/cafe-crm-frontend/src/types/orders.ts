@@ -45,7 +45,7 @@ export const MenuItemType = {
 
 export type MenuItemType = (typeof MenuItemType)[keyof typeof MenuItemType];
 
-export interface MenuItem {
+export interface OrderMenuItem {
   menuItemId: number;
   categoryId: number;
   name: string;
@@ -59,7 +59,7 @@ export interface MenuItem {
 export interface OrderItem {
   orderItemId: number;
   orderId: number;
-  menuItem: MenuItem;
+  menuItem: OrderMenuItem;
   quantity: number;
   comment: string | null;
   status: OrderItemStatus;
