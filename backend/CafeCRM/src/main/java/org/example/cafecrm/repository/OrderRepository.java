@@ -1,5 +1,7 @@
 package org.example.cafecrm.repository;
 
+import org.example.cafecrm.domain.dto.projection.AverageCheckProjection;
+import org.example.cafecrm.domain.dto.projection.HourlyLoadProjection;
 import org.example.cafecrm.domain.entity.Order;
 import org.example.cafecrm.domain.values.OrderStatus;
 import org.example.cafecrm.domain.values.OrderType;
@@ -26,8 +28,8 @@ public interface OrderRepository extends JpaRepository<@NotNull Order, @NotNull 
         WHERE o.status = 'CLOSED'
         AND o.closedAt BETWEEN :start AND :end
         """)
-    Object[] calculateAverageCheck(@Param("start") LocalDateTime start,
-                                   @Param("end") LocalDateTime end);
+    AverageCheckProjection calculateAverageCheck(@Param("start") LocalDateTime start,
+                                                  @Param("end") LocalDateTime end);
 
     /**
      * Загрузка по часам за период.
@@ -40,6 +42,6 @@ public interface OrderRepository extends JpaRepository<@NotNull Order, @NotNull 
         GROUP BY HOUR(o.createdAt)
         ORDER BY HOUR(o.createdAt)
         """)
-    List<Object[]> findHourlyLoad(@Param("start") LocalDateTime start,
-                                  @Param("end") LocalDateTime end);
+    List<HourlyLoadProjection> findHourlyLoad(@Param("start") LocalDateTime start,
+                                              @Param("end") LocalDateTime end);
 }

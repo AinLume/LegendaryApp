@@ -13,7 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@jakarta.persistence.Table(name = "reservation")
+@Table(name = "reservation")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -1,5 +1,6 @@
 package org.example.cafecrm.repository;
 
+import org.example.cafecrm.domain.dto.projection.PopularItemProjection;
 import org.example.cafecrm.domain.entity.OrderItem;
 import org.example.cafecrm.domain.values.Destination;
 import org.example.cafecrm.domain.values.OrderItemStatus;
@@ -36,7 +37,7 @@ public interface OrderItemRepository extends JpaRepository<@NotNull OrderItem, @
         GROUP BY oi.menuItem.id, oi.menuItem.name, oi.menuItem.category.name
         ORDER BY SUM(oi.menuItem.price * oi.quantity) DESC
         """)
-    Page<Object @NotNull []> findPopularItems(@Param("start") LocalDateTime start,
-                                              @Param("end") LocalDateTime end,
-                                              Pageable pageable);
+    Page<@NotNull PopularItemProjection> findPopularItems(@Param("start") LocalDateTime start,
+                                                          @Param("end") LocalDateTime end,
+                                                          Pageable pageable);
 }

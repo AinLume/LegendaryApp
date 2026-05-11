@@ -17,6 +17,7 @@ public interface StaffMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "orders", ignore = true)
     @Mapping(target = "reservations", ignore = true)
+    @Mapping(target = "password", ignore = true)
     Staff toEntity(StaffCreateRequest request);
 
     @Mapping(target = "id", ignore = true)

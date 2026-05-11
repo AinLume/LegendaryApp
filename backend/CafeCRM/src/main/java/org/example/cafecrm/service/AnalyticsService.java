@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.cafecrm.domain.dto.analytics.AverageCheckDto;
 import org.example.cafecrm.domain.dto.analytics.HourlyLoadDto;
 import org.example.cafecrm.domain.dto.analytics.PopularItemsDto;
+import org.example.cafecrm.domain.dto.projection.HourlyLoadProjection;
+import org.example.cafecrm.domain.dto.projection.PopularItemProjection;
+import org.example.cafecrm.domain.dto.projection.AverageCheckProjection;
 import org.example.cafecrm.repository.OrderItemRepository;
 import org.example.cafecrm.repository.OrderRepository;
 import org.jetbrains.annotations.NotNull;
@@ -49,9 +52,9 @@ public class AnalyticsService {
         LocalDateTime startDateTime = start.atStartOfDay();
         LocalDateTime endDateTime = end.atTime(LocalTime.MAX);
 
-        Object[] result = orderRepository.calculateAverageCheck(startDateTime, endDateTime);
-        Long totalRevenue = (Long) result[0];
-        Long totalOrders = (Long) result[1];
+        AverageCheckProjection projection = orderRepository.calculateAverageCheck(startDateTime, endDateTime);
+        long totalRevenue = projection.totalRevenue();
+        long totalOrders = projection.totalOrders();
 
         BigDecimal averageCheck = totalOrders > 0
                 ? BigDecimal.valueOf(totalRevenue)
@@ -79,13 +82,13 @@ public class AnalyticsService {
         LocalDateTime startDateTime = start.atStartOfDay();
         LocalDateTime endDateTime = end.atTime(LocalTime.MAX);
 
-        List<Object[]> rawData = orderRepository.findHourlyLoad(startDateTime, endDateTime);
+        List<HourlyLoadProjection> projections = orderRepository.findHourlyLoad(startDateTime, endDateTime);
 
-        List<HourlyLoadDto.HourlyData> hourlyData = rawData.stream()
-                .map(row -> new HourlyLoadDto.HourlyData(
-                        ((Number) row[0]).intValue(),
-                        ((Number) row[1]).longValue(),
-                        ((Number) row[2]).longValue()
+        List<HourlyLoadDto.HourlyData> hourlyData = projections.stream()
+                .map(p -> new HourlyLoadDto.HourlyData(
+                        p.hour(),
+                        p.orderCount(),
+                        p.revenue()
                 ))
                 .toList();
 
@@ -109,16 +112,16 @@ public class AnalyticsService {
         LocalDateTime startDateTime = start.atStartOfDay();
         LocalDateTime endDateTime = end.atTime(LocalTime.MAX);
 
-        Page<Object @NotNull []> page = orderItemRepository.findPopularItems(startDateTime, endDateTime, pageable);
+        Page<@NotNull PopularItemProjection> page = orderItemRepository.findPopularItems(startDateTime, endDateTime, pageable);
 
         List<PopularItemsDto.ItemStat> topItems = page.getContent().stream()
-                .map(row -> new PopularItemsDto.ItemStat(
-                        ((Number) row[0]).longValue(),
-                        (String) row[1],
-                        (String) row[2],
-                        ((Number) row[3]).longValue(),
-                        ((Number) row[4]).longValue(),
-                        ((Number) row[5]).longValue()
+                .map(p -> new PopularItemsDto.ItemStat(
+                        p.menuItemId(),
+                        p.menuItemName(),
+                        p.categoryName(),
+                        p.orderCount(),
+                        p.totalQuantity(),
+                        p.totalRevenue()
                 ))
                 .toList();
 
