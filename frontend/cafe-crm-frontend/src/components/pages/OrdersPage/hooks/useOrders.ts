@@ -24,7 +24,7 @@ export const useOrders = (params?: OrdersQueryParams) => {
       if (params !== null && params !== undefined) {
           fetchOrders()
       }
-  }, [fetchOrders, params]);
+  }, []);
 
   return { data, isLoading, error, refetch: fetchOrders };
 };
