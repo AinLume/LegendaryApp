@@ -1,9 +1,14 @@
-import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { OrdersPage } from './components/pages/OrdersPage';
+import "./App.css";
 
 export const App = () => {
-    return (
-        <>
-            <p className={'text-3xl text-red-500'}>Hello world</p>
-        </>
-    )
-}
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<OrdersPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};

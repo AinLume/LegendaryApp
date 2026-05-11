@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+@plugin "tailwindcss-palette-generator" {
+    primary: #BF6230;
+    secondary: #207E62;
+}
