@@ -24,6 +24,13 @@ export const ordersApi = {
     return response.data;
   },
 
+  getAllByTableId: async (tableId: number, params?: OrdersQueryParams): Promise<PageResponse<Order>> => {
+    const response = await api.get<PageResponse<Order>>('/api/orders', {
+      params: { ...params, tableId },
+    });
+    return response.data;
+  },
+
   create: async (dto: CreateOrderDto): Promise<Order> => {
     const response = await api.post<Order>('/api/orders', dto);
     return response.data;

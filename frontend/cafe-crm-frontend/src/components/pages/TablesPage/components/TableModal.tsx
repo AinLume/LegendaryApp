@@ -1,8 +1,9 @@
 import { useState, useEffect, type FC } from 'react';
 import { ordersApi, reservationsApi } from '../../../../api';
-import { TableStatus, OrderStatus, OrderItemStatus, ReservationType } from '../../../../types';
+import { TableStatus, OrderStatus, OrderItemStatus, ReservationType, StaffRole } from '../../../../types';
 import type { Table, Order, Reservation } from '../../../../types';
-import {Badge, Button, Input, Modal} from "../../../ui";
+import { Badge, Button, Input, Modal } from "../../../ui";
+import { useAuth } from '../../../../hooks/useAuth';
 
 export interface IProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export interface IProps {
 type Tab = 'info' | 'reservation' | 'orders';
 
 export const TableModal: FC<IProps> = ({ isOpen, table, onClose, onUpdate }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('info');
   const [orders, setOrders] = useState<Order[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -42,8 +44,12 @@ export const TableModal: FC<IProps> = ({ isOpen, table, onClose, onUpdate }) => 
     if (!table) return;
     setLoading(true);
     try {
+      const isAdmin = user?.role === StaffRole.ADMIN;
+
       const [ordersData, reservationsData] = await Promise.all([
-        ordersApi.getByTableId(table.tableId),
+        isAdmin
+          ? ordersApi.getAllByTableId(table.tableId, { size: 100 }).then((data) => data.content)
+          : ordersApi.getByTableId(table.tableId),
         reservationsApi.getByTableId(table.tableId).catch(() => []),
       ]);
       setOrders(ordersData);
