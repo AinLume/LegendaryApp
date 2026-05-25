@@ -6,7 +6,6 @@ import { CreateTableModal } from './components/CreateTableModal';
 import { TableModal } from './components/TableModal';
 import { tablesApi } from '../../../api';
 import type { Table } from '../../../types';
-import { TableStatus } from '../../../types';
 
 const SCHEME_SIZE = 600;
 
@@ -168,7 +167,7 @@ export const TablesPage: FC = () => {
                       capacity: table.capacity,
                       posX: displayX,
                       posY: displayY,
-                      status: table.status ?? TableStatus.FREE,
+                      status: table.status,
                     }}
                     isEditing={isEditing}
                     isDragging={isDragging}

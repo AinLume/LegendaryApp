@@ -10,11 +10,6 @@ export const reservationsApi = {
     return response.data;
   },
 
-  getById: async (id: number): Promise<Reservation> => {
-    const response = await api.get<Reservation>(`/api/reservations/${id}`);
-    return response.data;
-  },
-
   create: async (dto: CreateReservationDto): Promise<Reservation> => {
     const response = await api.post<Reservation>('/api/reservations', dto);
     return response.data;
@@ -22,13 +17,6 @@ export const reservationsApi = {
 
   cancel: async (id: number): Promise<Reservation> => {
     const response = await api.put<Reservation>(`/api/reservations/${id}/cancel`);
-    return response.data;
-  },
-
-  getAvailableTables: async (startTime: string, endTime: string, persons: number) => {
-    const response = await api.get('/api/reservations/available-tables', {
-      params: { startTime, endTime, persons },
-    });
     return response.data;
   },
 

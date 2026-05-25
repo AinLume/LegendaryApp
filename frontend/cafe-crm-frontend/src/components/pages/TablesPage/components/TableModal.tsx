@@ -4,6 +4,7 @@ import { TableStatus, OrderStatus, OrderItemStatus, ReservationType, StaffRole }
 import type { Table, Order, Reservation } from '../../../../types';
 import { Badge, Button, Input, Modal } from "../../../ui";
 import { useAuth } from '../../../../hooks/useAuth';
+import { toLocalISOString } from '../../../../utils/formatDateTime';
 
 export interface IProps {
   isOpen: boolean;
@@ -88,8 +89,8 @@ export const TableModal: FC<IProps> = ({ isOpen, table, onClose, onUpdate }) => 
         guestName: reservationForm.guestName,
         guestPhone: reservationForm.guestPhone,
         persons: reservationForm.persons,
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
+        startTime: toLocalISOString(startTime),
+        endTime: toLocalISOString(endTime),
         type: ReservationType.TABLE,
         note: reservationForm.note || undefined,
       });

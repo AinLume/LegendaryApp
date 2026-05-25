@@ -1,6 +1,7 @@
-import type {FC} from 'react';
+import  {type FC} from 'react';
 import { TableStatus } from '../../../../types';
 import { cn } from '../../../../utils';
+import * as React from "react";
 
 export interface IProps {
   table: {
