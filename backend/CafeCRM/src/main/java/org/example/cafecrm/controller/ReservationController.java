@@ -72,7 +72,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getById(id));
     }
 
-    @GetMapping("/by-table/{tableId}")
+    @GetMapping("/table/{tableId}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Получить бронирования по столику",
