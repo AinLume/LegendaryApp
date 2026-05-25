@@ -40,4 +40,17 @@ public interface ReservationRepository extends JpaRepository<@NotNull Reservatio
 
     List<Reservation> findByTableIdOrderByStartTimeAsc(Long tableId);
 
+    /**
+     * Проверяет, есть ли активное бронирование для столика прямо сейчас
+     */
+    @Query("""
+        SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END
+        FROM Reservation r
+        WHERE r.table.id = :tableId
+        AND r.status = 'ACTIVE'
+        AND r.startTime <= :now
+        AND r.endTime > :now
+        """)
+    boolean existsActiveReservationForTableNow(@Param("tableId") Long tableId, @Param("now") LocalDateTime now);
+
 }

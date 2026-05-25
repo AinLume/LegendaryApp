@@ -219,4 +219,15 @@ public class ReservationService {
 
         return reservationMapper.toResponse(updated);
     }
+
+    /**
+     * Проверяет, есть ли активное бронирование для столика прямо сейчас.
+     *
+     * @param tableId идентификатор столика
+     * @return true если столик занят активным бронированием, false если свободен
+     */
+    @Transactional(readOnly = true)
+    public boolean isTableOccupiedNow(Long tableId) {
+        return reservationRepository.existsActiveReservationForTableNow(tableId, LocalDateTime.now());
+    }
 }

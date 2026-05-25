@@ -1,5 +1,6 @@
 package org.example.cafecrm.service;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.example.cafecrm.domain.dto.table.CreateTableRequest;
 import org.example.cafecrm.domain.dto.table.TableResponse;
@@ -87,16 +88,16 @@ public class TableService {
 
     /**
      * Возвращает все столики.
+     * <p>
+     * Статус столика вычисляется динамически: если есть активное бронирование
+     * на текущий момент, столик считается занятым (OCCUPIED), иначе свободным (FREE).
      *
      * @return список DTO всех столиков;
      *         пустой список, если столиков нет
      */
     @Transactional(readOnly = true)
     public List<TableResponse> findAll() {
-        return tableRepository.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+        return tableRepository.findAllWithCurrentStatus(LocalDateTime.now());
     }
 
     /**
