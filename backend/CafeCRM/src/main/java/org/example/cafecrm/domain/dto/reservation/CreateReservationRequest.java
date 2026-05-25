@@ -1,5 +1,6 @@
 package org.example.cafecrm.domain.dto.reservation;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,9 +25,11 @@ public record CreateReservationRequest(
         Integer persons,
 
         @NotNull
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Europe/Moscow")
         LocalDateTime startTime,
 
         @NotNull
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Europe/Moscow")
         LocalDateTime endTime,
 
         @NotNull

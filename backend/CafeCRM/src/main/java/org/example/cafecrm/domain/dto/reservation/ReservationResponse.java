@@ -1,5 +1,6 @@
 package org.example.cafecrm.domain.dto.reservation;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.example.cafecrm.domain.dto.table.TableShortResponse;
 import org.example.cafecrm.domain.values.ReservationStatus;
 import org.example.cafecrm.domain.values.ReservationType;
@@ -12,10 +13,13 @@ public record ReservationResponse(
         String guestName,
         String guestPhone,
         Integer persons,
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Europe/Moscow")
         LocalDateTime startTime,
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Europe/Moscow")
         LocalDateTime endTime,
         ReservationType type,
         ReservationStatus status,
         String note,
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Europe/Moscow")
         LocalDateTime createdAt
 ) {}

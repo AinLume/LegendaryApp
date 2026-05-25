@@ -5,6 +5,9 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
+  jackson:
+    time-zone: Europe/Moscow
+
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
     enabled: true
