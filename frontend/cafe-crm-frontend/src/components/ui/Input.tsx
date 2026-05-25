@@ -34,21 +34,3 @@ export const Input: FC<IProps> = ({ label, error, className, id, ...props }) => 
     </div>
   );
 };
-
-/*
-Примеры использования:
-
-import { Input } from './components/ui/Input';
-
-<Input
-  label="Email"
-  type="email"
-  placeholder="example@mail.com"
-/>
-
-<Input
-  label="Пароль"
-  type="password"
-  error="Неверный пароль"
-/>
-*/

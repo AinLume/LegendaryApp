@@ -78,33 +78,3 @@ export const Button: FC<IProps> = ({
     </button>
   );
 };
-
-/*
-Примеры использования:
-
-import { Button } from './components/ui/Button';
-
-// Базовая кнопка
-<Button>Нажать</Button>
-
-// С разными вариантами
-<Button variant="secondary">Вторичная</Button>
-<Button variant="danger">Удалить</Button>
-<Button variant="ghost">Отмена</Button>
-
-// С разными размерами
-<Button size="sm">Маленькая</Button>
-<Button size="lg">Большая</Button>
-
-// Состоянием загрузки
-<Button isLoading>Сохранение...</Button>
-
-// На всю ширину
-<Button fullWidth>Во всю ширину</Button>
-
-// С дополнительными классами
-<Button className="mt-4 shadow-lg">С кастомными стилями</Button>
-
-// Отключённая
-<Button disabled>Неактивна</Button>
-*/

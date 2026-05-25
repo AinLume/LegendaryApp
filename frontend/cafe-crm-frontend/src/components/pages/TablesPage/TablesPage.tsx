@@ -3,6 +3,7 @@ import { Button } from '../../ui';
 import { useTables } from './hooks/useTables';
 import { TableItem } from './components/TableItem';
 import { CreateTableModal } from './components/CreateTableModal';
+import { TableModal } from './components/TableModal';
 import { tablesApi } from '../../../api';
 import type { Table } from '../../../types';
 import { TableStatus } from '../../../types';
@@ -13,6 +14,7 @@ export const TablesPage: FC = () => {
   const { data: tables, isLoading, refetch } = useTables();
   const [isEditing, setIsEditing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [draggedTable, setDraggedTable] = useState<Table | null>(null);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -45,6 +47,13 @@ export const TablesPage: FC = () => {
       refetch();
     } catch (error) {
       console.error('Ошибка удаления стола:', error);
+    }
+  };
+
+  const handleTableClick = (tableId: number) => {
+    const table = tables.find((t) => t.tableId === tableId);
+    if (table) {
+      setSelectedTable(table);
     }
   };
 
@@ -97,6 +106,14 @@ export const TablesPage: FC = () => {
     }
   };
 
+  const handleModalClose = () => {
+    setSelectedTable(null);
+  };
+
+  const handleUpdate = () => {
+    refetch();
+  };
+
   if (isLoading) {
     return (
       <div>
@@ -112,7 +129,10 @@ export const TablesPage: FC = () => {
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Схема зала</h1>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Схема зала</h1>
+              <p className="text-gray-600 mt-1">Нажмите на стол для деталей, брони и заказов</p>
+            </div>
             <div className="flex gap-2">
               <Button
                 variant={isEditing ? 'danger' : 'secondary'}
@@ -156,6 +176,7 @@ export const TablesPage: FC = () => {
                     onDrag={isEditing ? handleDrag : undefined}
                     onDragEnd={isEditing ? handleDragEnd : undefined}
                     onDelete={isEditing ? handleDeleteTable : undefined}
+                    onClick={handleTableClick}
                   />
                 );
               })}
@@ -183,6 +204,13 @@ export const TablesPage: FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreate={handleCreateTable}
+      />
+
+      <TableModal
+        isOpen={selectedTable !== null}
+        table={selectedTable}
+        onClose={handleModalClose}
+        onUpdate={handleUpdate}
       />
     </div>
   );

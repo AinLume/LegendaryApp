@@ -28,15 +28,3 @@ export const Badge: FC<IProps> = ({ children, variant = 'neutral' }) => {
     </span>
   );
 };
-
-/*
-Примеры использования:
-
-import { Badge } from './components/ui/Badge';
-
-<Badge>Нейтральный</Badge>
-<Badge variant="success">Успех</Badge>
-<Badge variant="warning">Внимание</Badge>
-<Badge variant="error">Ошибка</Badge>
-<Badge variant="info">Информация</Badge>
-*/

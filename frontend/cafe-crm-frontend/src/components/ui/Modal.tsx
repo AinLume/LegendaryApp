@@ -1,14 +1,24 @@
 import {type FC, useEffect, type ReactNode } from 'react';
 
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
+
 export interface IProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
   children: ReactNode;
   footer?: ReactNode;
+  size?: ModalSize;
 }
 
-export const Modal: FC<IProps> = ({ isOpen, onClose, title, children, footer }) => {
+const sizeClasses: Record<ModalSize, string> = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
+};
+
+export const Modal: FC<IProps> = ({ isOpen, onClose, title, children, footer, size = 'md' }) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -33,7 +43,7 @@ export const Modal: FC<IProps> = ({ isOpen, onClose, title, children, footer }) 
         className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
-      <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+      <div className={`relative bg-white rounded-lg shadow-lg w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col ${sizeClasses[size]}`}>
         {title && (
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
@@ -57,36 +67,3 @@ export const Modal: FC<IProps> = ({ isOpen, onClose, title, children, footer }) 
     </div>
   );
 };
-
-/*
-Примеры использования:
-
-import { Modal } from './components/ui/Modal';
-import { Button } from './components/ui/Button';
-import { useState } from 'react';
-
-const Example = () => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <>
-      <Button onClick={() => setIsOpen(true)}>Открыть модалку</Button>
-      <Modal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title="Заголовок"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setIsOpen(false)}>
-              Отмена
-            </Button>
-            <Button onClick={() => setIsOpen(false)}>OK</Button>
-          </>
-        }
-      >
-        <p>Содержимое модального окна</p>
-      </Modal>
-    </>
-  );
-};
-*/
