@@ -72,6 +72,27 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getById(id));
     }
 
+    @GetMapping("/by-table/{tableId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Получить бронирования по столику",
+            description = "Возвращает список всех бронирований для указанного столика. Доступно только администратору."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Успешно",
+                    content = @Content(schema = @Schema(implementation = ReservationResponse.class))
+            ),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён — требуется роль ADMIN")
+    })
+    public ResponseEntity<@NotNull List<ReservationResponse>> getByTableId(
+            @PathVariable
+            @Parameter(description = "ID столика", example = "1")
+            Long tableId) {
+        return ResponseEntity.ok(reservationService.getByTableId(tableId));
+    }
+
     @GetMapping("/available-tables")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(

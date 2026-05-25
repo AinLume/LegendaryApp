@@ -89,6 +89,21 @@ public class ReservationService {
     }
 
     /**
+     * Возвращает все бронирования для указанного столика.
+     *
+     * @param tableId идентификатор столика
+     * @return список DTO бронирований для столика;
+     *         пустой список, если бронирований нет
+     */
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getByTableId(Long tableId) {
+        return reservationRepository.findByTableIdOrderByStartTimeAsc(tableId)
+                .stream()
+                .map(reservationMapper::toResponse)
+                .toList();
+    }
+
+    /**
      * Возвращает доступные столики на указанный временной интервал.
      * <p>
      * Фильтрует столики по вместимости (должна быть не меньше запрошенного

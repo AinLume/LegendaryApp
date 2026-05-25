@@ -38,4 +38,6 @@ public interface ReservationRepository extends JpaRepository<@NotNull Reservatio
 
     List<Reservation> findAllByStatusOrderByStartTimeAsc(ReservationStatus status);
 
+    List<Reservation> findByTableIdOrderByStartTimeAsc(Long tableId);
+
 }
