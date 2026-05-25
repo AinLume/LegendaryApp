@@ -97,7 +97,17 @@ public class TableService {
      */
     @Transactional(readOnly = true)
     public List<TableResponse> findAll() {
-        return tableRepository.findAllWithCurrentStatus(LocalDateTime.now());
+        return tableRepository.findAllWithCurrentStatus(LocalDateTime.now())
+                .stream()
+                .map(row -> new TableResponse(
+                        row.getId(),
+                        row.getNumber(),
+                        row.getCapacity(),
+                        row.getPosX(),
+                        row.getPosY(),
+                        row.getStatus()
+                ))
+                .toList();
     }
 
     /**
