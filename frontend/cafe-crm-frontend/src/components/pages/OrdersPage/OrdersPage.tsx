@@ -6,13 +6,13 @@ import { OrderStatus } from '../../../types';
 
 export const OrdersPage: FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | undefined>();
-  const { data, isLoading, error, refetch } = useOrders({ status: selectedStatus });
+  const { data, isLoading, error, fetchOrders } = useOrders();
 
   const handleCancelOrder = async (orderId: number) => {
     try {
       // Здесь будет вызов API для отмены
       console.log('Отмена заказа:', orderId);
-      await refetch();
+      await fetchOrders();
     } catch (err) {
       console.error('Ошибка при отмене заказа:', err);
     }
@@ -22,11 +22,18 @@ export const OrdersPage: FC = () => {
     try {
       // Здесь будет вызов API для закрытия заказа с выбором способа оплаты
       console.log('Закрытие заказа:', orderId);
-      refetch();
+      fetchOrders({});
     } catch (err) {
       console.error('Ошибка при закрытии заказа:', err);
     }
   };
+
+  const handleChangeStatus = (value: OrderStatus | undefined) => {
+      if (value === selectedStatus) return;
+
+      setSelectedStatus(value);
+      fetchOrders({ status: value });
+  }
 
   const statuses: { value: OrderStatus; label: string }[] = [
     { value: OrderStatus.NEW, label: 'Новые' },
@@ -42,12 +49,12 @@ export const OrdersPage: FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-gray-900">Заказы</h1>
-            <Button variant='primary' onClick={() => refetch()}>Обновить</Button>
+            <Button variant='primary' onClick={() => fetchOrders()}>Обновить</Button>
           </div>
 
           <div className="mb-6 flex gap-2 flex-wrap">
             <button
-              onClick={() => setSelectedStatus(undefined)}
+              onClick={() => handleChangeStatus(undefined)}
               className={`px-4 py-2 rounded-lg transition-colors ${
                 selectedStatus === undefined
                   ? 'bg-primary text-white'
@@ -59,7 +66,7 @@ export const OrdersPage: FC = () => {
             {statuses.map((status) => (
               <button
                 key={status.value}
-                onClick={() => setSelectedStatus(status.value)}
+                onClick={() => handleChangeStatus(status.value)}
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   selectedStatus === status.value
                     ? 'bg-primary text-white'

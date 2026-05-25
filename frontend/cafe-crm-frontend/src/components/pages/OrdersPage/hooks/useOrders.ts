@@ -2,12 +2,12 @@ import {useCallback, useEffect, useState} from 'react';
 import { ordersApi } from '../../../../api';
 import type {Order, OrdersQueryParams, PageResponse} from '../../../../types';
 
-export const useOrders = (params?: OrdersQueryParams) => {
+export const useOrders = () => {
   const [data, setData] = useState<PageResponse<Order> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchOrders = useCallback(async () => {
+  const fetchOrders = useCallback(async (params?: OrdersQueryParams) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -18,13 +18,11 @@ export const useOrders = (params?: OrdersQueryParams) => {
     } finally {
       setIsLoading(false);
     }
-  }, [params]);
-
-  useEffect(() => {
-      if (params !== null && params !== undefined) {
-          fetchOrders()
-      }
   }, []);
 
-  return { data, isLoading, error, refetch: fetchOrders };
+  useEffect(() => {
+      fetchOrders()
+  }, []);
+
+  return { data, isLoading, error, fetchOrders };
 };
